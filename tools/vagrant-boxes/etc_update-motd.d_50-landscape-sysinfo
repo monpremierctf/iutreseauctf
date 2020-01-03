@@ -1,0 +1,7 @@
+#!/bin/sh
+# pam_motd does not carry the environment
+[ -f /etc/default/locale ] && . /etc/default/locale
+export LANG
+
+/usr/bin/landscape-sysinfo | grep -v "br-" | grep -v "docker0"
+echo

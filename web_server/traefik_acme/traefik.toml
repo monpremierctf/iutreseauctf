@@ -1,0 +1,38 @@
+debug = false
+
+logLevel = "INFO"
+defaultEntryPoints = ["https","http"]
+
+[accessLog]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+
+  [entryPoints.https]
+  address = ":443"
+  [entryPoints.https.tls]
+
+[retry]
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+#domain = "yoloctf.org"
+watch = true
+exposedByDefault = false
+
+[acme]
+email = "admin@yoloctf.org"
+storage = "acme.json"
+entryPoint = "https"
+#onHostRule = true
+caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+acmeLogging = true
+
+[acme.httpChallenge]
+entryPoint = "http"
+
+[[acme.domains]]
+main = "yoloctf.org"

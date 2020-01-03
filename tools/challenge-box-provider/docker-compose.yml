@@ -1,0 +1,27 @@
+#
+#
+#
+version: '2'
+
+
+services:
+  challenge-box-provider:
+    image: ubuntu:latest
+    #build: ./ 
+    container_name: challenge-box-provider
+    #ports:
+    #  - "9080:8080"
+    networks:
+        - webserver_webLAN
+    labels:
+      - "traefik.enable=false"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/var/challenge-box-provider
+    privileged: true
+    command: /var/challenge-box-provider/challenge-box-provider
+
+
+networks:
+  webserver_webLAN:
+    external: true

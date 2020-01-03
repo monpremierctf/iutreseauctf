@@ -1,0 +1,468 @@
+#!/bin/bash
+#
+# All in one start/stop script for Yolo CTF server
+#
+
+
+# Help
+usage () {
+  echo "Usage: $0 [-h] [-y] [-n]" 1>&2; 
+  echo "[-h] : this help" 1>&2; 
+  echo "[-y] : Yes to all" 1>&2; 
+  echo "[-n] : No rebuild" 1>&2; 
+  exit 1;
+}
+
+# Parse arguments
+for i in "$@"
+do
+case $i in
+    -y)
+    echo "Yes to all"
+    YESTOALL=1
+    shift # past argument=value
+    ;;
+
+    -n)
+    echo "No rebuild"
+    NOREBUILD=1
+    shift # past argument=value
+    ;;
+
+    -h)
+    usage
+    ;;
+esac
+done
+
+
+#
+# Put everything in a function to easilly redirect stdout to a log file
+#
+
+ctf_install() {
+#
+TIME_START=$(date +%s);
+
+#
+# Load config from .env
+#
+if [ ! -f ".env" ]; then
+  cp env.default .env
+fi
+
+. ./.env
+
+
+if [ $WITH_UFW == 1 ] 
+then
+  echo "WITH_UFW active"
+  if [[ $(which ufw) && $(ufw --version) ]]; then
+    echo "ufw found"
+    printf "$(ufw --version)\n"
+
+    # Check no password
+    echo "ufw sudo without passwd : "
+    if sudo -l | grep ufw | grep NOPASSWD; then
+        echo "ok"
+    else
+        echo "ko"
+        echo "Pour activer : "
+        echo 'sudo echo "$USER ALL = NOPASSWD: /usr/sbin/ufw" >> /etc/sudoers'
+    fi
+    # Block all incoming
+    sudo ufw default deny incoming
+    sudo ufw default allow outgoing
+    sudo ufw allow 22
+    sudo ufw allow 80
+    sudo ufw allow 443
+    sudo ufw enable
+    cd tools/ufw
+    python proxy_ufw.py &
+    cd -
+  else
+    echo "Ko"
+    echo "Pour installer ufw rapidement:"
+    echo "sudo apt-get update"
+    echo "sudo apt-get install ufw"
+    exit;
+  fi
+fi
+
+
+# Make banner thanks to:
+# http://patorjk.com/software/taag/#p=display&f=Small&t=Mon%20Premier%20CTF
+echo "
+  __  __            ___               _            ___ _____ ___ 
+ |  \/  |___ _ _   | _ \_ _ ___ _ __ (_)___ _ _   / __|_   _| __|
+ | |\/| / _ \ ' \  |  _/ '_/ -_) '  \| / -_) '_| | (__  | | | _| 
+ |_|  |_\___/_||_| |_| |_| \___|_|_|_|_\___|_|    \___| |_| |_| 
+"
+#############################################################################
+#
+# System checks
+#
+echo "= Verification du système..."
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+#
+# system Ubuntu
+printf "=> Verification : Ubuntu : "
+
+if uname -a |grep -qw Ubuntu; then 
+    echo "Ok"; 
+    echo $(uname -v)
+else 
+    printf "${RED}Ko${NC}\n"; 
+    echo uname -v
+    echo "Les scripts n'ont été testé que sous Ubuntu 18. Ca peut marcher .. ou pas. Bonne chance."
+fi
+
+#
+# Please avoid running as root or with sudo
+printf "=> Verification : Utilisateur non root : "
+if [ $(id -u) -eq 0 ]; then 
+    printf "${RED}Ko${NC}\n"
+    echo "Il est recommandé de lancer le script avec un compte utilisateur non root appartenant au groupe Docker."
+    echo "Vous etes actuellement root ou dans un sudo."
+    echo "Des fichiers ou répertoires risquent d'être créés par root et ne seront plus lisibles/effacables par un utilisateur lambda."
+    if [ $YESTOALL != "1" ]
+    then
+      while true; do
+          read -p "Désirez vous continuer en root (o/N) ? : " yn
+          case $yn in
+              [Oo]* ) echo "Ok, on continue en root"; break;;
+              * ) echo "Ok, on arrête ici. Relancez sans sudo ou avec un user non root"; exit;;
+          esac
+      done
+    fi
+else 
+    echo "Ok"
+fi
+
+
+#
+# python 2.xx installed
+printf "=> Verification : python 2.7 installé : "
+if [[ $(which python) ]]; then
+    echo "Ok"
+    printf "$(python --version)"
+  else
+    printf "${RED}Ko${NC}\n"
+    echo "Pour installer python rapidement:"
+    echo "sudo apt-get update"
+    echo "sudo apt-get install python-minimal"
+    exit;
+fi
+
+
+#
+# docker-compose installed
+printf "=> Verification : docker-compose installé : "
+if [[ $(which docker-compose) && $(docker-compose --version) ]]; then
+    echo "Ok"
+    printf "$(docker-compose --version)\n"
+  else
+    printf "${RED}Ko${NC}\n"
+    echo "Pour installer docker-compose rapidement:"
+    echo "sudo apt-get update"
+    echo "sudo apt-get install docker-compose"
+    exit;
+fi
+
+
+#
+# Docker installed
+printf "=> Verification : Docker installé : "
+if [[ $(which docker) && $(docker --version) ]]; then
+    echo "Ok"
+    printf "$(docker --version)\n"
+  else
+    printf "${RED}Ko${NC}\n"
+    echo "Pour installer docker proprement consultez la documentation de votre distribution."
+    exit;
+fi
+
+
+
+
+#
+# zip installed
+# Option -D required
+printf "=> Verification : zip installé : "
+if [[ $(which zip) ]]; then
+    echo "Ok"
+  else
+    printf "${RED}Ko${NC}\n"
+    echo "Pour installer zip rapidement:"
+    echo "sudo apt-get update"
+    echo "sudo apt install zip"
+    exit;
+fi
+
+#
+# user in Docker group
+printf "=> Verification : Si non root, Utilisateur dans le group Docker : "
+if [ $(id -u) -ne 0 ]; then 
+    if id -nG $USER | grep -qw "docker"; then
+        echo "Ok"
+    else
+        printf "${RED}Ko${NC}\n"
+        echo "Si l'utilisateur n'est pas root, il doit appartenir au groupe Docker."
+        echo "Utilisez la commande suivant pour ajouter l'utilisateur courant au groupe Docker"
+        echo "Ensuite deconnectez et reconnectez vous. Personnellement, je reboote le serveur..."
+        echo "sudo gpasswd -a \$USER docker"
+        exit;
+    fi
+else
+    echo "Ok"
+fi
+
+
+
+#
+# Is docker running ?
+printf "=> Verification : Docker démarré : "
+if docker info 2>&1 | grep -qw "Cannot connect to the Docker daemon"; then 
+    printf "${RED}Ko${NC}\n"
+    echo "Vous devriez pouvoir démarrer le service docker avec la commande:"
+    echo "sudo service docker start"
+    exit;
+else
+    echo "Ok"
+    echo $(docker info 2>/dev/null | grep "Server Version")
+fi
+
+#############################################################################
+#
+# Setup
+#
+
+if [ ! -f challenges_list.cfg ]; then
+  cp challenges_list.cfg.default challenges_list.config
+fi
+
+
+
+#
+# Extract default config   
+#
+echo "Extracting default config"
+if [ -d ctfd_config/tmp ]; then
+    rm -R ctfd_config/tmp
+fi
+mkdir ctfd_config/tmp
+unzip -q -d ctfd_config/tmp ctfd_config/empty_conf.zip
+
+
+
+
+
+#
+# Generate config from challenge directories
+#
+echo "Generation des fichers de config"
+python ./gen_config.py
+
+#if [ ! -f "web_server/.env" ]; then
+#  cp web_server/env.default web_server/.env
+#fi
+
+#
+# Update config in each challenge directory
+#
+echo "Mise à jour des fichiers de config propres à chaque challenge"
+python -c 'from gen_config import challenges_set_config; challenges_set_config()'
+
+#
+# Update webserver config
+#
+python -c 'from gen_config import gen_env_file; gen_env_file("web_server")'
+cd web_server
+./challenge_set_config.sh
+cd -
+
+#
+# Verification de la configuration
+#
+echo "===================="
+echo "Verification de la configuration"
+echo ""
+python -c 'from gen_config import dump_challenges_env; dump_challenges_env()'
+echo ''
+echo '[web_server/.env]'
+cat web_server/.env
+if [ $YESTOALL != "1" ]
+then
+  while true; do
+      echo "";echo ""
+      read -p "La config est-elle ok ? (O/n) ? : " yn
+      case $yn in
+          [Nn]* ) echo "Ok, on arrête ici."; exit;;
+          * ) echo "Ok, on continue."; break;;
+      esac
+  done
+fi
+
+#
+# Copy json files to web server
+#
+echo "Copying files to web server"
+cp -R ./ctfd_config/tmp/* web_server/www_site/yoloctf
+chmod -R a+r web_server/www_site/yoloctf
+
+
+
+#
+# Build challenge-box-provider
+#
+#cd challenge-box-provider
+#docker build -t challenge-box-provider .
+#cd - > /dev/null
+
+#
+# Create docker netkorks
+# 
+docker network create webserver_webLAN
+
+
+#
+# Build ctf-sshd
+#
+if [ ! "$NOREBUILD" == 1 ]
+then
+echo "Building ctf-sshd image"
+cd tools/ctf-sshd
+docker build -t ctf-sshd .
+cd - > /dev/null
+fi
+
+#
+# Build ctf-python-editor
+#
+if [ ! "$NOREBUILD" == 1 ]
+then
+echo "Building ctf-php-nginx image"
+cd tools/ctf-php-nginx
+docker build -t ctf-php-nginx .
+cd - > /dev/null
+echo "Building ctf-python-editor image"
+cd tools/ctf-python-editor
+docker build -t ctf-python-editor .
+cd - > /dev/null
+fi
+
+#
+# Build xtermjs
+#
+if [ ! "$NOREBUILD" == 1 ]
+then
+echo "Building ctf-tools-xtermjs image"
+cd tools/xterm
+./go_xterm
+cd - > /dev/null
+cd tools/xterm/xterm.js-3.13.0/
+docker-compose build
+cd - > /dev/null
+cd tools/xterm/ctf-tool-xterm/
+docker-compose build
+cd - > /dev/null
+fi
+
+#
+# Build dockers images for challenges
+#
+if [ ! "$NOREBUILD" == 1 ]
+then
+python -c 'from gen_config import build_challenges; build_challenges()'
+#python -c 'from gen_config import start_challenges; start_challenges()'
+fi
+
+#
+# Generate self-signed certificates
+#
+if [ ! "$NOREBUILD" == 1 ]
+then
+if [ $TRAEFIK_SELF_SIGNED_CERTS == 1 ] 
+then
+  cd web_server/traefik
+  ./go_gen_certs
+  cd - > /dev/null
+else
+  if [ ! -f web_server/traefik_acme/acme.json]
+  then
+    cp web_server/traefik_acme/acme.json.default web_server/traefik_acme/acme.json
+  fi
+fi
+fi
+
+#
+# Start traefik
+#
+if [ $TRAEFIK_SELF_SIGNED_CERTS == 1 ] 
+then
+cd web_server/traefik
+docker-compose build
+docker-compose up -d
+cd - > /dev/null
+fi
+
+
+#
+# Start web_server
+#
+cd web_server
+docker-compose build
+docker-compose up -d
+cd - > /dev/null
+
+
+
+
+#
+# Start challenge box provider
+#
+cd tools/challenge-box-provider
+docker-compose up -d
+cd - > /dev/null
+
+
+# Start static challenges
+# 
+cd ctf-sqli
+docker-compose up -d
+cd - > /dev/null
+cd ctf-passwd
+docker-compose up -d
+cd - > /dev/null
+
+#
+# Print config overall duration
+#
+echo
+echo `date`
+echo
+TIME_END=$(date +%s);
+echo $((TIME_END-TIME_START)) | awk '{print "Configuration réalisée en "int($1/60)" minutes "int($1%60)" secondes"}'
+
+#
+# Logs
+#
+# docker-compose logs
+# docker stats
+
+echo "*****************"
+echo ""
+echo "S'il n'y a pas eu de message d'erreur, vous pouvez à présent vous connecter à l'interface web:"
+echo "http://localhost/yoloctf/"
+echo ""
+
+. ./web_server/.env
+echo ""
+echo "compte admin   : $CTF_ADMIN_ACCOUNT"
+echo "password admin : $CTF_ADMIN_PASSWORD"
+
+}
+
+ctf_install 2>&1 | tee ./install.log

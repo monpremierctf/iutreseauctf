@@ -1,0 +1,19 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/eoan64"
+  config.vm.network "public_network",
+    bridge: "eth1",
+    use_dhcp_assigned_default_route: true
+  # default router
+  config.vm.provision "shell",
+    run: "always",
+    inline: "route del default; route add default gw lan.home "
+  # copy /etc/issue
+  config.vm.provision "file", source: "etc_issue", destination: "/etc/issue"
+  config.vm.provision "file", source: "etc_issue", destination: "~/issue"
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "vm_yoloctf"
+    vb.memory = 4000
+    vb.cpus = 2 
+  end
+
+end
