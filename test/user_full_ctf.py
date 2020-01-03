@@ -74,9 +74,17 @@ def register_user(user, login, password, mail, code):
 
 
 
-def login_user(login,password):
-    resp = user1.session.get('https://localhost/yoloctf/login.php', verify=False)    
-    return
+def login_user(user, login,password):   
+    print (login)
+    print(password)
+    resp = user.session.get('https://localhost/yoloctf/index.php') 
+    resp = user.session.get('https://localhost/yoloctf/login.php')
+    payload = {'login':login, 'password':password}
+    resp = user.session.post(url='https://localhost/yoloctf/login.php', data=payload)
+    #print resp.text
+    if (resp.text.find(login)>0):
+        return True
+    return False
 
 
 def get_terminal_id(txt):
@@ -175,17 +183,45 @@ containers = [
 ]
 
 
-def scenario_serial(nbUserMax, noxterm, nocontainer, maxsleep):
+
+
+def scenario_serial(exportfileName, nbUserMax, noxterm, nocontainer, maxsleep):
     init()
     flags = load_flags()
-    print ("Registering "+str(nbUserMax)+" users : ")
-    for x in range(nbUserMax):
-        user1  = UserSession()
-        if (register_user(user1, user1.login, user1.password, user1.mail, 'IUTCTF')):
-            users.append(user1)
-            print "."+str(user1.id)
-    print ("Registered "+str(len(users))+" users.")
 
+    if (len(exportfileName)<=0):
+        print ("Registering "+str(nbUserMax)+" users : ")
+        for x in range(nbUserMax):
+            user1  = UserSession()
+            if (register_user(user1, user1.login, user1.password, user1.mail, 'IUTCTF')):
+                users.append(user1)
+                print "."+str(user1.id)
+            else:
+                print "Pb register "+str(user1.id)+". "
+        print ("Registered "+str(len(users))+" users.")
+    else:
+        print("Using user file")
+        with open(exportfileName) as fp:
+            line = fp.readline()
+            cnt = 1
+            while line and (cnt<=nbUserMax):
+                #print("Line {}: {}".format(cnt, line.strip()))
+                fields = line.split(";")
+                if (fields[5].strip()!= "no_name_yet"):
+                    user1  = UserSession()
+                    user1.login = fields[5].strip()
+                    user1.password = fields[4].strip()
+
+                    if (login_user(user1, user1.login, user1.password)):
+                        users.append(user1)
+                        print "."+str(user1.id)
+                    else: 
+                        print "Pb login "+str(user1.id)+". "
+                    cnt += 1
+                line = fp.readline()
+                
+
+    
     # CTF ongoing
     nb_xterm=0
     nb_containers=0
@@ -365,13 +401,13 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, service_shutdown)
 
     # Init
+    nbUserMax = 300
     print ("= Init")
-    #scenario_serial(150, True, True, 2)
-    #exit()
+    scenario_serial("extract_clean.txt", nbUserMax, False, False, 2)
+    exit()
 
     # Register users
-    nbUserMax = 10
-    #scenario_serial(nbUserMax)
+
     try:
         scenario_parallel(nbUserMax)
         while True:

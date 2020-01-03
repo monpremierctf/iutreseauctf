@@ -138,10 +138,10 @@
 
     }
 
-    function DBImportUser($login, $passwd, $mail, $pseudo, $uid, $status) {
+    function DBImportUser($login, $upasswd, $mail, $pseudo, $uid, $status) {
         include "ctf_sql.php";
         $status = 'enabled';
-        $request = "INSERT into users (login, passwd, mail, pseudo, UID, status) VALUES ('$login', '$passwd', '$mail','$pseudo', '$uid', '$status')";
+        $request = "INSERT into users (login, passwd, mail, pseudo, UID, status) VALUES ('$login', md5('$upasswd'), '$mail','$pseudo', '$uid', '$status')";
         $result = $mysqli->query($request);
         $count  = $result->affected_rows;
         if ($result) {}
@@ -172,26 +172,26 @@
     function DBImportParticipantsFromFileLine($line){
         $f = explode(";", $line);
 
-        $etablissement = $f[2];
-        $lycee = $f[3];
+        $etablissement = trim($f[2]);
+        $lycee = trim($f[3]);
 
-        $uid = $f[4];
-        $teamname = $f[5];
+        $uid = trim($f[4]);
+        $teamname = trim($f[5]);
 
-        $uid1 = $f[6];
-        $nom1 = $f[7];
-        $prenom1 = $f[8];
-        $email1 = $f[9];
-        $ismail1confirmed = $f[10];
+        $uid1 = trim($f[6]);
+        $nom1 = trim($f[7]);
+        $prenom1 = trim($f[8]);
+        $email1 = trim($f[9]);
+        $ismail1confirmed = trim($f[10]);
 
-        $uid2 = $f[11];
-        $nom2 = $f[12];
-        $prenom2 = $f[13];
-        $email2 = $f[14];
-        $ismail2confirmed = $f[15];
+        $uid2 = trim($f[11]);
+        $nom2 = trim($f[12]);
+        $prenom2 = trim($f[13]);
+        $email2 = trim($f[14]);
+        $ismail2confirmed = trim($f[15]);
 
-        $state = $f[16];
-        $flags = $f[17];
+        $state = trim($f[16]);
+        $flags = trim($f[17]);
 
         DBImportParticipants($lycee, $etablissement,
             $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
