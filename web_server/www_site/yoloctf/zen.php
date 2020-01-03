@@ -5,6 +5,8 @@
     header("X-XSS-Protection: 1");
     header('X-Frame-Options: SAMEORIGIN'); 
     session_start ();
+
+
 ?>
 
 <!DOCTYPE html>
@@ -109,6 +111,109 @@
 
     }
 
+    function DBCreateExtTable(){
+        include "ctf_sql.php";
+        $query = 'CREATE TABLE IF NOT EXISTS participants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            lycee VARCHAR,
+            etablissement VARCHAR,
+            nom1 VARCHAR,
+            prenom1 VARCHAR,
+            email1 VARCHAR,
+            uid1 VARCHAR,
+            ismail1confirmed boolean,
+            nom2 VARCHAR,
+            prenom2 VARCHAR,
+            email2 VARCHAR,
+            uid2 VARCHAR,
+            ismail2confirmed boolean,
+            uid VARCHAR,
+            teamname VARCHAR,
+            state INTEGER
+        );';
+		if ($result = $mysqli->query($query)) {
+			
+		}
+		$mysqli->close();
+
+    }
+
+    function DBImportUser($login, $passwd, $mail, $pseudo, $uid, $status) {
+        include "ctf_sql.php";
+        $status = 'enabled';
+        $request = "INSERT into users (login, passwd, mail, pseudo, UID, status) VALUES ('$login', '$passwd', '$mail','$pseudo', '$uid', '$status')";
+        $result = $mysqli->query($request);
+        $count  = $result->affected_rows;
+        if ($result) {}
+        $mysqli->close();
+    }
+
+    function DBImportParticipants($lycee, $etablissement,
+        $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
+        $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
+        $uid , $state){
+        include "ctf_sql.php";
+        
+        $query = "INSERT INTO participants (
+            lycee, etablissement,
+            nom1, prenom1, email1, uid1, ismail1confirmed,
+            nom2, prenom2, email2, uid2, ismail2confirmed,
+            uid , state) 
+        VALUES ('$lycee', '$etablissement',
+            '$nom1', '$prenom1', '$email1', '$uid1', '$ismail1confirmed',
+            '$nom2', '$prenom2', '$email2', '$uid2', '$ismail2confirmed',
+            '$uid' , '$state');";
+        if ($result = $mysqli->query($query)) {
+			
+		}
+		$mysqli->close();
+    }
+
+    function DBImportParticipantsFromFileLine($line){
+        $f = explode(";", $line);
+
+        $etablissement = $f[2];
+        $lycee = $f[3];
+
+        $uid = $f[4];
+        $teamname = $f[5];
+
+        $uid1 = $f[6];
+        $nom1 = $f[7];
+        $prenom1 = $f[8];
+        $email1 = $f[9];
+        $ismail1confirmed = $f[10];
+
+        $uid2 = $f[11];
+        $nom2 = $f[12];
+        $prenom2 = $f[13];
+        $email2 = $f[14];
+        $ismail2confirmed = $f[15];
+
+        $state = $f[16];
+        $flags = $f[17];
+
+        DBImportParticipants($lycee, $etablissement,
+            $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
+            $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
+            $uid , $state);
+
+        DBImportUser($teamname, $uid, $email1, $teamname, $uid, 'enabled');
+    }
+
+    function DBImportParticipantsFromFile(){
+        $handle = fopen("extract_sample.txt", "r");
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                DBImportParticipantsFromFileLine($line);
+            }
+
+            fclose($handle);
+        } else {
+            // error opening the file.
+        } 
+    }
+
     function clearUsers(){
         include "ctf_sql.php";
         clearFlags();
@@ -168,7 +273,12 @@
             if (isset($_GET['clearFlags'])){
                 clearFlags();
             }
+            if (isset($_GET['importParticipants'])){
+                DBImportParticipantsFromFile();
+            }
             
+
+
             // Get containers
             $url = 'http://challenge-box-provider:8080/listChallengeBox/';
             $json = file_get_contents_curl($url);
@@ -193,6 +303,9 @@
             
             echo "<h4>BDD</h4>";
             print '<a href="zen.php?clearFlags" ><pre class="ctf-menu-color">[ClearFlags]</pre></a> ';
+
+            echo "<h4>Import</h4>";
+            print '<a href="zen.php?importParticipants" ><pre class="ctf-menu-color">[ImportParticipants]</pre></a> ';
 
 
         } else {
