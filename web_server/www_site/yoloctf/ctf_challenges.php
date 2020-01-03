@@ -70,6 +70,16 @@ function isFlagValid($id, $flag){
   return false;
 }
 
+function getChallValue($id){
+  $chall = getChallengeById($id);  
+  if (isset($chall['value'])) {
+    return $chall['value'];
+  } else {
+    return 0;
+  }
+}
+
+
 function getCategoryLabel($cat){
   $label="";
   $intro = getIntro($cat);

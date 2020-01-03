@@ -181,7 +181,7 @@ def scenario_serial(nbUserMax, noxterm, nocontainer, maxsleep):
     print ("Registering "+str(nbUserMax)+" users : ")
     for x in range(nbUserMax):
         user1  = UserSession()
-        if (register_user(user1, user1.login, user1.password, user1.mail, 'yolo')):
+        if (register_user(user1, user1.login, user1.password, user1.mail, 'IUTCTF')):
             users.append(user1)
             print "."+str(user1.id)
     print ("Registered "+str(len(users))+" users.")
@@ -267,7 +267,7 @@ SHOULD_TERMINATE = False
 def run_user_journey(u, flags):
     time.sleep(randint(2, 4))
     print ("["+str(u.id)+"] Register ")
-    register_user(u, u.login, u.password, u.mail, 'yolo')
+    register_user(u, u.login, u.password, u.mail, 'IUTCTF')
 
 
     totalflag= len(flags['results']) 

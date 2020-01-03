@@ -52,154 +52,75 @@
 
         <!--- Page Content  -->
         <div class="col">
-        <div class="container">
+			<div class="container">
+				<div>
+					<canvas id='canvas_00'></canvas>
+				</div>
 
-
-       
-
-<?php
-	require_once('db_requests.php');
-
-
-function dumpFlagDataSetCurrentUser() {
-	$r = 240; $g = 20;	$b = 80;
-	echo "{
-		label: '".htmlspecialchars($_SESSION['login'], ENT_QUOTES| ENT_HTML401)."',   
-		backgroundColor: color('rgb($r, $g, $b)').alpha(0.5).rgbString(),
-		borderColor: 'rgb($r, $g, $b)',
-		fill: false,
-		data: [";					
-	dumpUserFlagDataSet($_SESSION['uid']);
-	echo "],
-	},";
-}
-
-function dumpFlagDataSet($pageId, $ctfuid='') {
-		include "ctf_sql.php";
-		$min = $pageId*20;
-		
-		if ($ctfuid==='') {
-			$user_query = "SELECT login, UID FROM users LIMIT $min, 20;";
-		} else {
-			$user_query = "SELECT users.login, users.UID FROM users INNER JOIN ctfsusers ON users.UID = ctfsusers.UIDUSER WHERE ctfsusers.UIDCTF='$ctfuid' LIMIT $min, 20;";
-		}
-
-		if ($user_result = $mysqli->query($user_query)) {
-			while ($row = $user_result->fetch_assoc()) {
-				$uid = $row['UID'];
-				$login = $row['login'];
-				if ($uid!="") {
-
-					if ($_SESSION['login']===$login){
-						$r = 240;
-						$g = 20;
-						$b = 80;
-					} else {
-						$r = rand(0, 88);
-						$g = 40+rand(0, 80);
-						$b = 40+rand(0, 80);
-					}
-					
-					echo "{
-						label: '".htmlspecialchars($login, ENT_QUOTES| ENT_HTML401)."',
-						backgroundColor: color('rgb($r, $g, $b)').alpha(0.5).rgbString(),
-						borderColor: 'rgb($r, $g, $b)',
-						fill: false,
-						data: [";					
-					dumpUserFlagDataSet($uid);
-					echo "],
-					},";
-				}
-			}
-		
-			/* free result set */
-			$user_result->close();
-		} else {
-			echo "pb query";
-		}
-
-		/* close connection */
-		$mysqli->close();
-	}
-?>
-        
-
-<?php
-	
-
-
-	function getNbUsersInCTF($uidctf)
-	{
-		include "ctf_sql.php";
-		$uidctf_sqlsafe = mysqli_real_escape_string($mysqli, $uidctf);
-		$request = "SELECT * FROM ctfsusers WHERE UIDCTF='$uidctf_sqlsafe'";
-		$result = $mysqli->query($request);
-		$count  = $result->num_rows;
-		return $count;
-	}
-
-	
-	if ($scoreboard_aff=='user_only') {
-		// Online: User in a dynamic CTF
-		if (isset($_SESSION['ctfuid'])&&($_SESSION['ctfuid']!=='')) {
-			//echo "<div class='col-2'>dynamic CTF : ".$_SESSION['ctfname']."</div>";	
-			$nbusers = getNbUsersInCTF($_SESSION['ctfuid']);
-			$nbpages = floor($nbusers/20);
-			//echo "<br>nbusers=$nbusers nbpages=$nbpages";
-		// Online: User only
-		} else {
-			$nbusers = 1;
-			$nbpages = 0;
-		}
-	// Offline : All users
-	} else {
-		$nbusers = getNbUsers();
-		$nbpages = floor($nbusers/20);
-	}
- 	
-	//
-	// Let print the scoreboards with datas
-	//
-	for ($pageid = 0; $pageid <= $nbpages; $pageid++) { 
-		echo "
-			<div>
-			<canvas id='canvas_$pageid'></canvas>
 			</div>
-		";
+			<button type="submit" class="btn btn-primary" onclick="return refreshChartFlags()">Refresh</button>   
+        </div>
+    </div>
+</div>
+
+
+  
+</body>
+</html>
+
+<script>
+	
+
+	var color = Chart.helpers.color;
+
+	function addFlagDataset(myBarChart, user) {
+		var user_dataset_url = "https://localhost/yoloctf/zen_data.php?UsersFlags=5e0f2b9684325";
+		var user_dataset = [{ x: '1/3/2020 11:55', y: 1}, { x: '1/3/2020 11:55', y: 3}, { x: '1/3/2020 11:55', y: 8}, { x: '1/3/2020 11:56', y: 13}, { x: '1/3/2020 11:56', y: 18}, { x: '1/3/2020 11:56', y: 23}, { x: '1/3/2020 11:56', y: 28}, { x: '1/3/2020 11:56', y: 33}, { x: '1/3/2020 11:56', y: 38}, { x: '1/3/2020 11:56', y: 43}, { x: '1/3/2020 11:56', y: 48}, { x: '1/3/2020 11:56', y: 53}, { x: '1/3/2020 11:56', y: 58}, { x: '1/3/2020 11:56', y: 65}, { x: '1/3/2020 11:56', y: 72}, { x: '1/3/2020 11:56', y: 79}, { x: '1/3/2020 11:57', y: 89},]
+		var r=Math.floor(Math.random() * 88);
+		var g=40+Math.floor(Math.random() * 80);
+		var b=40+Math.floor(Math.random() * 80);
+		var color_str = 'rgb('+r.toString()+', '+g.toString()+', '+b.toString()+')';
+		$.get(
+			"https://localhost/yoloctf/zen_data.php",
+			{UsersFlags : user},
+			function(data) {
+				//alert(data);
+				//data = '[ { "x": "1/3/2020 11:55", "y": 1} ]';
+				var dataset = {
+						label: user, 
+						backgroundColor: color(color_str).alpha(0.5).rgbString(),
+						borderColor: color_str,
+						fill: false,
+						data: JSON.parse(data),
+				}
+				//alert(dataset);
+				myBarChart.data.datasets.push(dataset);
+				myBarChart.update();
+			}
+		);
+		
+			
 	}
-	echo "
-	<script>
+	window.onload = function() {
+		initChartFlags();
+		loadChartFlags();
+	}
+
+	function refreshChartFlags() {
+		l_00.data.datasets=[];
+		l_00.update();
+		loadChartFlags();
+	}
+
+	var l_00=null;
+	function initChartFlags() {
 		var timeFormat = 'MM/DD/YYYY HH:mm';
-
-		function newDate(days) {
-			return moment().add(days, 'd').toDate();
-		}
-
-		function newDateString(days) {
-			return moment().add(days, 'd').format(timeFormat);
-		}
-
-		var color = Chart.helpers.color;
-	";
-	for ($pageid = 0; $pageid <= $nbpages; $pageid++) { 
-		echo "
-		var config_$pageid = {
+		var config_00 = {
 			type: 'line',
 			data: {
 				labels: [],
 				
-				datasets: [	";	
-		if ($scoreboard_aff=='user_only')		{
-			if (isset($_SESSION['ctfuid'])&&($_SESSION['ctfuid']!=='')) {
-				dumpFlagDataSet($pageid, $_SESSION['ctfuid']);
-			} else {
-				dumpFlagDataSetCurrentUser();
-			}
-		} else {
-		 	dumpFlagDataSet($pageid);
-		}		 
-		echo "
-				]
+				datasets: [	 ]
 			},
 			options: {
 				title: {
@@ -226,60 +147,19 @@ function dumpFlagDataSet($pageId, $ctfuid='') {
 					}]
 				},
 			}
-		};";
-	}	
-	echo "window.onload = function() {";
-	for ($pageid = 0; $pageid <= $nbpages; $pageid++) { 
-		echo "
-			var ctx_$pageid = document.getElementById('canvas_$pageid').getContext('2d');
-			//window.myLine = new Chart(ctx, config_0);
-			l_$pageid = new Chart(ctx_$pageid, config_$pageid);
-			";
+		};
+		var ctx_00 = document.getElementById('canvas_00').getContext('2d');
+		l_00 = new Chart(ctx_00, config_00);
 	}
-	echo "	};";
+
+	function loadChartFlags() {
+		addFlagDataset(l_00, "5e0f2b9684325");
+		addFlagDataset(l_00, "5e0f2b96816fe");
+		addFlagDataset(l_00, "5e0f2b9681c12");
+		addFlagDataset(l_00, "5e0f2b968809d");
+	}
 	
-?>	
-
-
-
-	</script>
-
-<?php
-    
-    
-    function file_get_contents_curl($url) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
-        curl_setopt($ch, CURLOPT_URL, $url);
-        //curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
-        //curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Your application name');
-        $data = curl_exec($ch);
-        curl_close($ch);
-        return $data;
-    }
-    if (isset($_SESSION['login'] )) {
-        
-
-            
-
-    } else {
-        //echo "Merci de vous connecter.";
-    }
-
-
-
- 
-?>
-         </div>
-        </div>
-    </div>
-</div>
-
-
-  
-</body>
-</html>
+</script>
 
 
 

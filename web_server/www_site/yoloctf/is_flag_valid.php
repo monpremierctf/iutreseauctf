@@ -14,6 +14,24 @@
         return $ret;
     }
 
+    function getUserScore($uid)
+    {
+        $ret=0;
+        include "ctf_sql.php";
+
+        $query = "select max(score) as maxscore from flags where (UID='$uid');";
+        //echo $query;
+		if ($result = $mysqli->query($query)) {
+            if ($row = $result->fetch_array()) {
+                $ret= $row['maxscore'];
+            }
+            $result->close();
+		}
+        $mysqli->close();
+        return $ret;
+    }
+
+
     function save_flag_submission($uid, $cid, $flag, $isvalid)
     {
         include "ctf_sql.php";
@@ -27,14 +45,20 @@
             //echo "Valid='$valid'";
             //insert into flags (UID,CHALLID, fdate, isvalid, flag) values ('user1','chall1', NOW(), TRUE, 'flag1');
             $flag = mysqli_real_escape_string($mysqli, $flag);
-            $query = "insert into flags (UID,CHALLID, fdate, isvalid, flag) values ('$uid','$cid', NOW(), '$isvalid', '$flag');";
+            $val=0;
+            $score=0;
+            if ($isvalid) {
+                $val = getChallValue($cid);
+                $score=getUserScore($uid)+$val;
+            }
+            $query = "insert into flags (UID,CHALLID, fdate, isvalid, flag, value, score) values ('$uid','$cid', NOW(), '$isvalid', '$flag', $val, $score);";
             //echo $query;
             
             if ($mysqli->query($query)===TRUE) {
                 // ok
             } else {
                 // ko
-                echo "Error: " . $sql . "<br>" . $conn->error;
+                echo "Error: " . $sql . "<br>" . $mysqli->error;
             }
     
 		/* close connection */

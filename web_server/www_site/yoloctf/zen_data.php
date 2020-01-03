@@ -73,6 +73,7 @@
             }
             // Datas
             if (isset($_GET['UsersFlags'])){
+
                 require_once('ctf_challenges.php');
                 dumpUserFlagDataSet($_GET['UsersFlags']);
                 exit;
