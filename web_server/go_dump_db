@@ -7,5 +7,9 @@ select * from ctfs; \
 select * from logs; \
 select * from feedbacks; \
 SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'flags'; \
-select * from ctfsusers; \
+select * from participants; \
+SELECT f.UID, max(score) as max_score, login \
+	FROM flags f left join users u	on f.UID = u.UID \
+	GROUP BY UID ORDER BY max(score) DESC; \
+
 "

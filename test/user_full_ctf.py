@@ -401,7 +401,7 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, service_shutdown)
 
     # Init
-    nbUserMax = 300
+    nbUserMax = 60
     print ("= Init")
     scenario_serial("extract_clean.txt", nbUserMax, False, False, 2)
     exit()

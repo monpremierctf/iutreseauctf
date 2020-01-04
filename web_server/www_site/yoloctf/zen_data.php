@@ -27,35 +27,6 @@
         echo getNbUsers();
     }
 
-    // {"a":1,"b":2,"c":3,"d":4,"e":5}
-    // login, passwd, mail, pseudo, UID, status
-    function dumpUserListJSON(){
-        include "ctf_sql.php";
-        $user_query = "SELECT * FROM users;";
-        if ($result = $mysqli->query($user_query)) {
-            header('Content-Type: application/json');
-            echo '[ ';
-            $isfirstrow=true;
-            while ($row = $result->fetch_assoc()) {
-                if (!$isfirstrow) {
-                    echo ",";
-                } else {
-                    $isfirstrow=false;
-                }
-                echo '{ ';
-                echo '"login":"'.htmlspecialchars($row['UID']).'", ';
-                echo '"passwd":"'.htmlspecialchars($row['UID']).'", ';
-                echo '"mail":"'.htmlspecialchars($row['UID']).'", ';
-                echo '"pseudo":"'.htmlspecialchars($row['UID']).'", '; 
-                echo '"UID":"'.htmlspecialchars($row['UID']).'", ';
-                echo '"status":"'.htmlspecialchars($row['UID']).'" ';
-                echo "}\n";
-            }
-            echo "]\n";
-            $result->close();
-        }
-        $mysqli->close();
-    }
 
     if (isset($_SESSION['login'] )) {
         // $admin from ctf_env.php
@@ -64,6 +35,10 @@
             // Datas
             if (isset($_GET['UsersList'])){
                 dumpUserListJSON();
+                exit;
+            }
+            if (isset($_GET['IUTList'])){
+                dumpIUTListJSON();
                 exit;
             }
             // Datas
@@ -78,6 +53,18 @@
                 dumpUserFlagDataSet($_GET['UsersFlags']);
                 exit;
             }
+            if (isset($_GET['Top20'])){
+                $nb= 0;
+                $enb = intval($_GET['Top20']);
+                if ( $enb >= 10) { $nb = $enb; }; 
+                $iut="";
+                $lycee="";
+                if (isset($_GET['iut'])) { $iut= $_GET['iut']; }
+                if (isset($_GET['lycee'])) { $lycee= $_GET['lycee']; }
+                dumpTop20($nb, $iut, $lycee);
+                exit;
+            }
+
         }
     }
 ?>

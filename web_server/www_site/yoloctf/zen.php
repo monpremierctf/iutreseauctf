@@ -111,6 +111,7 @@
 
     }
 
+    // Must be admin...
     function DBCreateExtTable(){
         include "ctf_sql.php";
         $query = 'CREATE TABLE IF NOT EXISTS participants (
@@ -165,7 +166,9 @@
             '$uid' , '$state');";
         if ($result = $mysqli->query($query)) {
 			
-		}
+		} else {
+
+        }
 		$mysqli->close();
     }
 

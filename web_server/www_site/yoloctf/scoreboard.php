@@ -52,14 +52,21 @@
 
         <!--- Page Content  -->
         <div class="col">
+
 			<div class="container">
 				<div>
 					<canvas id='canvas_00'></canvas>
 				</div>
 
+			<div>
+				<button type="submit" class="btn btn-primary" onclick="return refreshChartFlags()">TOP 20</button>   
 			</div>
-			<button type="submit" class="btn btn-primary" onclick="return refreshChartFlags()">Refresh</button>   
-        </div>
+			<div id='IUT'>	</div>
+			<div id='Top20'>
+					
+			</div>
+			
+			
     </div>
 </div>
 
@@ -73,16 +80,16 @@
 
 	var color = Chart.helpers.color;
 
-	function addFlagDataset(myBarChart, user) {
+	function addFlagDataset(myBarChart, user, uid) {
 		var user_dataset_url = "https://localhost/yoloctf/zen_data.php?UsersFlags=5e0f2b9684325";
 		var user_dataset = [{ x: '1/3/2020 11:55', y: 1}, { x: '1/3/2020 11:55', y: 3}, { x: '1/3/2020 11:55', y: 8}, { x: '1/3/2020 11:56', y: 13}, { x: '1/3/2020 11:56', y: 18}, { x: '1/3/2020 11:56', y: 23}, { x: '1/3/2020 11:56', y: 28}, { x: '1/3/2020 11:56', y: 33}, { x: '1/3/2020 11:56', y: 38}, { x: '1/3/2020 11:56', y: 43}, { x: '1/3/2020 11:56', y: 48}, { x: '1/3/2020 11:56', y: 53}, { x: '1/3/2020 11:56', y: 58}, { x: '1/3/2020 11:56', y: 65}, { x: '1/3/2020 11:56', y: 72}, { x: '1/3/2020 11:56', y: 79}, { x: '1/3/2020 11:57', y: 89},]
-		var r=Math.floor(Math.random() * 88);
-		var g=40+Math.floor(Math.random() * 80);
-		var b=40+Math.floor(Math.random() * 80);
+		var r=55+Math.floor(Math.random() * 200);
+		var g=55+Math.floor(Math.random() * 200);
+		var b=55+Math.floor(Math.random() * 200);
 		var color_str = 'rgb('+r.toString()+', '+g.toString()+', '+b.toString()+')';
 		$.get(
 			"https://localhost/yoloctf/zen_data.php",
-			{UsersFlags : user},
+			{UsersFlags : uid},
 			function(data) {
 				//alert(data);
 				//data = '[ { "x": "1/3/2020 11:55", "y": 1} ]';
@@ -104,6 +111,8 @@
 	window.onload = function() {
 		initChartFlags();
 		loadChartFlags();
+		initIUT();
+
 	}
 
 	function refreshChartFlags() {
@@ -152,11 +161,103 @@
 		l_00 = new Chart(ctx_00, config_00);
 	}
 
+	function top20_table_start() {
+		return ' \
+		<table class="table table-striped">\
+		<thead>\
+			<tr>\
+			<th scope="col">#</th>\
+			<th scope="col">Team</th>\
+			<th scope="col">Score</th>\
+			<th scope="col">IUT</th>\
+			<th scope="col">Lycee</th>\
+			</tr>\
+		</thead>\
+		<tbody>\
+		';
+	}
+	function top20_table_entry(count, entry){
+		return ' \
+		<tr> \
+			<th scope="row">'+count.toString()+'</th> \
+			<td>'+entry.login+'</td> \
+			<td>'+entry.score+'</td> \
+			<td>'+entry.etablissement+'</td>  \
+			<td>'+entry.lycee+'</td>  \
+    	</tr>' ;
+	
+	}
+	function top20_table_stop() {
+		return ' \
+		</tbody> \
+		</table> \
+		';
+	}
+
 	function loadChartFlags() {
-		addFlagDataset(l_00, "5e0f2b9684325");
-		addFlagDataset(l_00, "5e0f2b96816fe");
-		addFlagDataset(l_00, "5e0f2b9681c12");
-		addFlagDataset(l_00, "5e0f2b968809d");
+		$.get(
+			"https://localhost/yoloctf/zen_data.php",
+			{Top20 : 20},
+			function(data) {
+				table = top20_table_start();
+				//alert(data);
+
+				classement = JSON.parse(data);
+				count=0;
+				for (const entry of classement) {
+					table+=top20_table_entry(count, entry);
+					count=count+1;
+					addFlagDataset(l_00, entry.login, entry.UID);
+
+				}
+				table += top20_table_stop();
+				document.getElementById('Top20').innerHTML = table; 
+			}
+		);
+
+	}
+
+	function initIUT()
+	{
+		$.get(
+			"https://localhost/yoloctf/zen_data.php", {IUTList : 0},
+			function(data) {				
+				iutlist="";
+				for (const entry of data) {
+					iutlist+='<button type="submit" class="btn btn-info" onclick="loadIUTFlags(\''+entry.etablissement+'\')">'+entry.etablissement+'</button>';
+					//	+"<div id='iut_"+entry.etablissement+"'></div>";
+				}
+				document.getElementById('IUT').innerHTML = iutlist; 
+			}
+		);
+
+	}
+
+	function loadIUTFlags(iut)
+	{
+		l_00.data.datasets=[];
+		l_00.update();
+		$.get(
+			"https://localhost/yoloctf/zen_data.php",
+			{Top20 : 200, iut : iut},
+			function(data) {
+				table = top20_table_start();
+				//alert(data);
+
+				classement = JSON.parse(data);
+				count=0;
+				for (const entry of classement) {
+					table+=top20_table_entry(count, entry);
+					count=count+1;
+					addFlagDataset(l_00, entry.login, entry.UID);
+
+				}
+				table += top20_table_stop();
+				document.getElementById('Top20').innerHTML = table; 
+			}
+		);
+
+
 	}
 	
 </script>
