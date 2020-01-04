@@ -1,6 +1,7 @@
 <?php
     $admin = getenv('CTF_ADMIN_ACCOUNT')?getenv('CTF_ADMIN_ACCOUNT'):'admin';
     $passwd = getenv('MYSQL_USER_PASSWORD')?getenv('MYSQL_USER_PASSWORD'):'passwordforctfuser';
+    $mysql_root_passwd =  getenv('MYSQL_ROOT_PASSWORD')?getenv('MYSQL_ROOT_PASSWORD'):'passwordforctfroot';
 
     $scoreboard_aff = getenv('CTF_SCOREBOARD_AFF')?getenv('CTF_SCOREBOARD_AFF'):'all';
     $ctf_locale_enabled = getenv('CTF_LOCALE_ENABLED')?getenv('CTF_LOCALE_ENABLED'):'false';

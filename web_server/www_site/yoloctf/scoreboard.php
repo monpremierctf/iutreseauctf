@@ -59,6 +59,7 @@
 				</div>
 
 			<div>
+				<button type="submit" class="btn btn-primary" onclick="return refreshMyFlags()">Mes Flags</button> 
 				<button type="submit" class="btn btn-primary" onclick="return refreshChartFlags()">TOP 20</button>   
 			</div>
 			<div id='IUT'>	</div>
@@ -88,7 +89,7 @@
 		var b=55+Math.floor(Math.random() * 200);
 		var color_str = 'rgb('+r.toString()+', '+g.toString()+', '+b.toString()+')';
 		$.get(
-			"https://localhost/yoloctf/zen_data.php",
+			"zen_data.php",
 			{UsersFlags : uid},
 			function(data) {
 				//alert(data);
@@ -196,14 +197,14 @@
 
 	function loadChartFlags() {
 		$.get(
-			"https://localhost/yoloctf/zen_data.php",
+			"zen_data.php",
 			{Top20 : 20},
 			function(data) {
 				table = top20_table_start();
 				//alert(data);
 
 				classement = JSON.parse(data);
-				count=0;
+				count=1;
 				for (const entry of classement) {
 					table+=top20_table_entry(count, entry);
 					count=count+1;
@@ -220,7 +221,7 @@
 	function initIUT()
 	{
 		$.get(
-			"https://localhost/yoloctf/zen_data.php", {IUTList : 0},
+			"zen_data.php", {IUTList : 0},
 			function(data) {				
 				iutlist="";
 				for (const entry of data) {
@@ -238,7 +239,7 @@
 		l_00.data.datasets=[];
 		l_00.update();
 		$.get(
-			"https://localhost/yoloctf/zen_data.php",
+			"zen_data.php",
 			{Top20 : 200, iut : iut},
 			function(data) {
 				table = top20_table_start();
@@ -258,6 +259,13 @@
 		);
 
 
+	}
+
+
+	function refreshMyFlags(){
+		l_00.data.datasets=[];
+		l_00.update();
+		addFlagDataset(l_00, '<?php echo $_SESSION['login'] ?>', '<?php echo  $_SESSION['uid'] ?>');
 	}
 	
 </script>

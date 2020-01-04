@@ -63,6 +63,7 @@
         include "ctf_sql.php";
         $user_query = "SELECT login, UID FROM users;";
         if ($result = $mysqli->query($user_query)) {
+            echo "Nb users : ".$result->num_rows."</br>";
             while ($row = $result->fetch_assoc()) {
                 $uid = $row['UID'];
                 $login = $row['login'];
@@ -287,22 +288,29 @@
             $json = file_get_contents_curl($url);
             $cont = json_decode($json);
 
-            echo "<h4>Php sessions</h4> ";
+            echo "<h3>Php sessions</h3> ";
             echo "Nb sessions : ". get_active_users();
 
-            echo "<h4>Users</h4> ";
+            echo "<h3>Users</h3>
+                <div class='panel panel-primary'>
+                    <div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
             dumpUserList();
-            print "</br>";
+            print "</div></div></br>";
 
-            echo "<h4>Flags submited</h4> ";
+            echo "<h3>Flags submited</h3> 
+                <div class='panel panel-primary'>
+                    <div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
             dumpUserFlags();
-
+            print "</div></div></br>";
             
-            echo "<h4>Containers</h4> ";
-            echo "Nb Containers = ".count($cont)."</br>";
+            echo "<h3>Containers</h3> ";
+            echo "Nb Containers = ".count($cont)."</br>
+                <div class='panel panel-primary'>
+                    <div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
             dumpUserContainersList($cont);
-            
-            echo "</br>".$json;
+            print "</div></div></br>";
+
+            echo "</br>";
             
             echo "<h4>BDD</h4>";
             print '<a href="zen.php?clearFlags" ><pre class="ctf-menu-color">[ClearFlags]</pre></a> ';
