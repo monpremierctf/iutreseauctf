@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+# wget https://github.com/xtermjs/xterm.js/archive/3.13.0.zip
 unzip -qo xterm.js-3.13.0.zip
 cp docker-compose.yml  xterm.js-3.13.0/
 cp Dockerfile xterm.js-3.13.0/
