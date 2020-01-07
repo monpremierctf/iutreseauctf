@@ -10,6 +10,7 @@
     session_start ();
     require_once('ctf_mail.php');
     require_once('ctf_sql.php');
+    require_once('ctf_sql_pdo.php');
 
     //////////////////////////////////////////////////////////////////////////////
     // MUST HAVE a UID
@@ -45,6 +46,8 @@
     if (isset($_GET['setEmail'])){
         $newmail = $_GET['setEmail'];
         // Check email format
+        // Warning : "'`whoami`'"@example.com is ok for filter_var()
+        // \n\r will be detected
         if (!filter_var($newmail, FILTER_VALIDATE_EMAIL)) {
             // 400 Bad Request
             http_response_code(400);
@@ -52,32 +55,87 @@
             exit();
         }
         $uid = $_SESSION['uid'];
-        $request = "UPDATE users SET mail='$newmail' WHERE UID='$uid';";
-        $result = $mysqli->query($request);
-        if($result===true) {
-            http_response_code(200);
-            echo json_encode(array("message" => "eMail mis à jour."));
-            $_SESSION['mail']=$newmail;
-        } else {
-            // 500 Internal Server Error
+        $pdo_request = "UPDATE users SET mail=:newmail WHERE UID=:uid;";
+        $statement = $mysqli_pdo->prepare($pdo_request);
+        try {
+        $statement->execute([
+            'newmail' => $newmail,
+            'uid' => $uid 
+        ]);
+        } catch(PDOException $e) {
+            // Send 500 Internal Server Error
             http_response_code(500);
-            echo json_encode(array("message" => "Erreur sql [".$request."] ".$mysqli->error));
-            //echo $request;
-            //printf("Update failed: %s %s\n", $mysqli->error, $result);
+            echo json_encode(array("message" => "Erreur sql [".$e->getMessage()."] "));
+            die();
         }
+        http_response_code(200);
+        echo json_encode(array("message" => "eMail mis à jour."));
+        $_SESSION['mail']=$newmail;
         exit();
     }
 
 
 
     function username_exist($name) {
-        global $mysqli;
-        $request = "SELECT * FROM users WHERE login='$name'";
-        $result = $mysqli->query($request);
-        $count  = $result->num_rows;
+        global $mysqli_pdo;
+
+        $pdo_request = "SELECT * FROM users WHERE login=:name";
+        $statement = $mysqli_pdo->prepare($pdo_request);
+        try {
+            $statement->execute([
+                'name' => $name,
+        ]);
+        } catch(PDOException $e) {
+            // Send 500 Internal Server Error
+            http_response_code(500);
+            echo json_encode(array("message" => "Erreur sql [".$e->getMessage()."] "));
+            die();
+        }
+        $count = $statement->rowCount();
         return ($count>0);
     }
 
+
+    function username_update($uid, $newname) {
+        global $mysqli_pdo;
+
+        $pdo_request = "UPDATE users SET login=:newname WHERE UID=:uid;";
+        $statement = $mysqli_pdo->prepare($pdo_request);
+        try {
+            $statement->execute([
+                'newname' => $newname,
+                'uid' => $uid,
+        ]);
+        } catch(PDOException $e) {
+            // Send 500 Internal Server Error
+            http_response_code(500);
+            echo json_encode(array("message" => "Erreur sql [".$e->getMessage()."] "));
+            die();
+        }
+        $count = $statement->rowCount();
+        return ($count>0);
+    }
+
+
+    function password_update($uid, $password) {
+        global $mysqli_pdo;
+
+        $pdo_request = "UPDATE users SET passwd=:password WHERE UID=:uid;";
+        $statement = $mysqli_pdo->prepare($pdo_request);
+        try {
+            $statement->execute([
+                'password' => $password,
+                'uid' => $uid,
+        ]);
+        } catch(PDOException $e) {
+            // Send 500 Internal Server Error
+            http_response_code(500);
+            echo json_encode(array("message" => "Erreur sql [".$e->getMessage()."] "));
+            die();
+        }
+        $count = $statement->rowCount();
+        return ($count>0);
+    }
     //
     // Set name
     //
@@ -101,19 +159,10 @@
 
         // Save new name
         $uid = $_SESSION['uid'];
-        $request = "UPDATE users SET login='$newname' WHERE UID='$uid';";
-        $result = $mysqli->query($request);
-        if($result===true) {
-            http_response_code(200);
-            echo json_encode(array("message" => "Login mis à jour."));
-            $_SESSION['login']=$newname;
-        } else {
-            // 500 Internal Server Error
-            http_response_code(500);
-            echo json_encode(array("message" => "Erreur sql [".$request."] ".$mysqli->error));
-            //echo $request;
-            //printf("Update failed: %s %s\n", $mysqli->error, $result);
-        }
+        username_update($uid, $newname);
+        http_response_code(200);
+        echo json_encode(array("message" => "Login mis à jour."));
+        $_SESSION['login']=$newname;
         exit();
     }
 
@@ -124,7 +173,7 @@
     if (isset($_GET['setPassword'])) { 
         $desired_passwd = $_GET['setPassword'];
 
-        // Check email format
+        // Some containts on pwd ?
         if (strlen($desired_passwd)<3) {
             // 400 Bad Request
             http_response_code(400);
@@ -133,18 +182,10 @@
         }
 
         $newpwd = md5($desired_passwd);
-
         $uid = $_SESSION['uid'];
-        $request = "UPDATE users SET passwd='$newpwd' WHERE UID='$uid';";
-        $result = $mysqli->query($request);
-        if($result===true) {
-            http_response_code(200);
-            echo json_encode(array("message" => "Password mis à jour."));
-        } else {
-            // 500 Internal Server Error
-            http_response_code(500);
-            echo json_encode(array("message" => "Erreur sql [".$request."] ".$mysqli->error));
-        }
+        password_update($uid, $newpwd);
+        http_response_code(200);
+        echo json_encode(array("message" => "Password mis à jour."));
         exit();
     }
 
@@ -166,6 +207,48 @@
     //
     // Create CTF
     //
+
+    function ctfs_name_exist($name) {
+        global $mysqli_pdo;
+
+        $pdo_request = "SELECT * FROM ctfs WHERE ctfname=:$name";
+        $statement = $mysqli_pdo->prepare($pdo_request);
+        try {
+            $statement->execute([
+                'name' => $name,
+        ]);
+        } catch(PDOException $e) {
+            // Send 500 Internal Server Error
+            http_response_code(500);
+            echo json_encode(array("message" => "Erreur sql [".$e->getMessage()."] "));
+            die();
+        }
+        $count = $statement->rowCount();
+        return ($count>0);
+    }
+
+    function ctfs_create($uidctf, $name, $uid) {
+        global $mysqli_pdo;
+
+        $pdo_request = "INSERT into ctfs (creation_date, UIDCTF, ctfname, UIDADMIN) VALUES (now(), :uidctf, :name, :uid)";
+        $statement = $mysqli_pdo->prepare($pdo_request);
+        try {
+            $statement->execute([
+                'uidctf' => $uidctf,
+                'name' => $name,
+                'uid' => $uid,
+        ]);
+        } catch(PDOException $e) {
+            // Send 500 Internal Server Error
+            http_response_code(500);
+            echo json_encode(array("message" => "Erreur sql [".$e->getMessage()."] "));
+            die();
+        }
+        $count = $statement->rowCount();
+        return ($count>0);
+    }
+
+
     if (isset($_GET['createCTF'])){
         $desiredname = $_GET['createCTF'];
         if(strlen($desiredname)<2) {
@@ -179,10 +262,8 @@
         $name_htmlsafe = htmlspecialchars($desiredname, ENT_QUOTES| ENT_HTML401);
 
         // Already exist ?
-        $request = "SELECT * FROM ctfs WHERE ctfname='$name_sqlsafe'";
-        $result = $mysqli->query($request);
-        $count  = $result->num_rows;
-        if($count>0) {
+        $exist  = ctfs_name_exist($name_sqlsafe);
+        if($exist>0) {
             // 400 Bad Request
             http_response_code(400);
             echo json_encode(array("message" => "Existing CTF name.".$name_htmlsafe));
@@ -192,16 +273,10 @@
         $uid = $_SESSION['uid'];
         $creation_date = date("Y-m-d H:i:s");
         $uidctf = generate_UIDCTF(5);
-        $request = "INSERT into ctfs (creation_date, UIDCTF, ctfname, UIDADMIN) VALUES (now(), '$uidctf', '$name_sqlsafe','$uid');";
-        $result = $mysqli->query($request);
-        if ($result) {
-            http_response_code(200);
-            echo json_encode(array("message" => "CTF created."));
-        } else {
-            // 500 Internal Server Error
-            http_response_code(500);
-            echo json_encode(array("message" => "Erreur sql [".$request."] ".$mysqli->error));
-        }
+
+        ctfs_create($uidctf, $name_sqlsafe, $uid);
+        http_response_code(200);
+        echo json_encode(array("message" => "CTF created."));
     }
 
 
@@ -220,6 +295,8 @@
         return "";
     }
 
+
+    
     //
     // Join CTF
     //
