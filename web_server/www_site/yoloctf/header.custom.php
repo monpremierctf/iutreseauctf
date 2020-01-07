@@ -41,6 +41,7 @@ function ctf_insert_logo($logo, $url) {
 
 <style>
 .bg_black {background-color: black;}
+.col-white {color: white;}
 </style>
 
 <!---- Header container ---->  
@@ -83,10 +84,10 @@ function ctf_insert_logo($logo, $url) {
     <div class="col-md-2"><?php ctf_insert_logo("img/stormshield.png", "https://www.stormshield.com/"); ?></div>
     <div class="col-md-2"><?php ctf_insert_logo("img/orange.png", "https://cyberdefense.orange.com"); ?></div>
     <div class="col-md-2"><?php ctf_insert_logo("img/secnumedu.png", $ctf_url3); ?></div>
-    <div class="col-md-2"><?php ctf_insert_logo($ctf_logo2, $ctf_url2); ?></div>
+    <div class="col-md-2"><?php ctf_insert_logo($ctf_logo2, "https://www.iut-rt.net/"); ?></div>
     <div class="col-md-4">
         <h1 class="row-md-4 ctf-title-size">DAY CTF</h1>
-        <p><pre class='row-md-4 ctf-subtitle-size'> DUT R&T / Lycées </pre></p>  
+        <p><pre class='row-md-4 ctf-subtitle-size col-white'> DUT R&T / Lycées </pre></p>  
     </div>
 </div>
 </div>
