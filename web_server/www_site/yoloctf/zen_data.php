@@ -27,11 +27,7 @@
         echo getNbUsers();
     }
 
-
-    if (isset($_SESSION['login'] )) {
-        // $admin from ctf_env.php
-        if (($_SESSION['login']=== $admin )) {
-                        
+         
             // Datas
             if (isset($_GET['UsersList'])){
                 dumpUserListJSON();
@@ -65,6 +61,5 @@
                 exit;
             }
 
-        }
-    }
+
 ?>

@@ -246,7 +246,7 @@
 				//alert(data);
 
 				classement = JSON.parse(data);
-				count=0;
+				count=1;
 				for (const entry of classement) {
 					table+=top20_table_entry(count, entry);
 					count=count+1;
