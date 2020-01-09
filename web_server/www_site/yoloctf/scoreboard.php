@@ -1,4 +1,9 @@
 <?php
+	/*
+	INPUT: none
+	GLOBAL : $_SESSION
+
+	*/
     ini_set('session.cookie_httponly', 1);
     ini_set('session.cookie_secure', 1);
     header_remove("X-Powered-By");
@@ -81,6 +86,7 @@
 
 	var color = Chart.helpers.color;
 
+	/* user can be unsafe and could need to be escaped */
 	function addFlagDataset(myBarChart, user, uid) {
 		var user_dataset_url = "https://localhost/yoloctf/zen_data.php?UsersFlags=5e0f2b9684325";
 		var user_dataset = [{ x: '1/3/2020 11:55', y: 1}, { x: '1/3/2020 11:55', y: 3}, { x: '1/3/2020 11:55', y: 8}, { x: '1/3/2020 11:56', y: 13}, { x: '1/3/2020 11:56', y: 18}, { x: '1/3/2020 11:56', y: 23}, { x: '1/3/2020 11:56', y: 28}, { x: '1/3/2020 11:56', y: 33}, { x: '1/3/2020 11:56', y: 38}, { x: '1/3/2020 11:56', y: 43}, { x: '1/3/2020 11:56', y: 48}, { x: '1/3/2020 11:56', y: 53}, { x: '1/3/2020 11:56', y: 58}, { x: '1/3/2020 11:56', y: 65}, { x: '1/3/2020 11:56', y: 72}, { x: '1/3/2020 11:56', y: 79}, { x: '1/3/2020 11:57', y: 89},]
@@ -177,14 +183,29 @@
 		<tbody>\
 		';
 	}
+
+
+
+function escapeHtml(unsafe) {
+	if (unsafe ===null) return "";
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
+
+
 	function top20_table_entry(count, entry){
 		return ' \
 		<tr> \
 			<th scope="row">'+count.toString()+'</th> \
-			<td>'+entry.login+'</td> \
-			<td>'+entry.score+'</td> \
-			<td>'+entry.etablissement+'</td>  \
-			<td>'+entry.lycee+'</td>  \
+			<td>'+escapeHtml(entry.login)+'</td> \
+			<td>'+escapeHtml(entry.score)+'</td> \
+			<td>'+escapeHtml(entry.etablissement)+'</td>  \
+			<td>'+escapeHtml(entry.lycee)+'</td>  \
     	</tr>' ;
 	
 	}
@@ -265,7 +286,7 @@
 	function refreshMyFlags(){
 		l_00.data.datasets=[];
 		l_00.update();
-		addFlagDataset(l_00, '<?php echo $_SESSION['login'] ?>', '<?php echo  $_SESSION['uid'] ?>');
+		addFlagDataset(l_00, '<?php print htmlspecialchars($_SESSION['login']) ?>', '<?php echo  $_SESSION['uid'] ?>');
 	}
 	
 </script>

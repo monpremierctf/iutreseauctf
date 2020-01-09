@@ -70,6 +70,9 @@ def register_user(user, login, password, mail, code):
     # On est d accord, pas de test avec une balise html comme nom.. hein ?
     if (resp.text.find(login)>0):
         return True
+    print("REGISTER : KO")
+    print(resp.text.partition('\n')[0] + '...')
+    print("\n")
     return False
 
 
@@ -82,8 +85,10 @@ def login_user(user, login,password):
     payload = {'login':login, 'password':password}
     resp = user.session.post(url='https://localhost/yoloctf/login.php', data=payload)
     #print resp.text
-    if (resp.text.find(login)>0):
+    if (resp.text.find('Logout')>0):
         return True
+    print("LOGIN : KO")
+    print(resp.text + '...')
     return False
 
 

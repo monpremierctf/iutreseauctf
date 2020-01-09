@@ -1,5 +1,18 @@
 <?php
+/*
+    INPUT: 
+        $_GET['validate']
+        $_POST['login']
+        $_POST['password']
+        $_POST['code']
+        $_POST['mail']
+        $_POST['pseudo']
+    CMD: 
+        none
+	GLOBAL : $_SESSION
 
+    */
+    
     ini_set('session.cookie_httponly', 1);
     ini_set('session.cookie_secure', 1);
     header_remove("X-Powered-By");

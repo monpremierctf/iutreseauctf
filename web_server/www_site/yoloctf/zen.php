@@ -1,4 +1,12 @@
 <?php
+/*
+    INPUT: none
+    CMD: 
+        $_GET['clearFlags']
+        $_GET['importParticipants']
+	GLOBAL : $_SESSION
+
+	*/
     ini_set('session.cookie_httponly', 1);
     ini_set('session.cookie_secure', 1);
     header_remove("X-Powered-By");

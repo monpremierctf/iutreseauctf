@@ -1,36 +1,20 @@
 <?php
 function dumpUserFlagDataSet($uid){
-    include "ctf_sql.php";
-    
+    require_once "ctf_sql_pdo.php";
     
 	$count=0;
-	$query = "SELECT UID,CHALLID, fdate, isvalid, flag, score FROM flags WHERE UID='$uid';";
-	if ($fresult = $mysqli->query($query)) {
-        /* fetch object array */
+    $stmt = $mysqli_pdo->prepare('SELECT UID,CHALLID, fdate, isvalid, flag, score FROM flags WHERE UID=:uid');
+    if ($stmt->execute(['uid' => $uid ])) {
         echo '[';
         $firstrow=true;
-		while ($frow = $fresult->fetch_assoc()) {
-			//UID,CHALLID, fdate, isvalid, flag
-			//var_dump($row);
-			//printf ("%s (%s) (%s) (%s)</br>", $frow['UID'], $frow['flag'], $frow['isvalid'], $frow['fdate']);
+		while ($frow = $stmt->fetch()) {
 			if ($frow['isvalid']) { 
-                /*
-				$chall = getChallengeById($frow['CHALLID']);
-				if ($chall!=null){
-					$count+=$chall['value'];
-				} else {
-					$count++;
-				}
-                */
                 $count =  $frow['score'];
                 $dd = $frow['fdate'];
-                $format = '%Y-%m-%d %H:%M:%S'; // 
-                //$dd = '2019-05-18 15:32:15';
-                //$d = strptime($dd , $format);
+                $format = '%Y-%m-%d %H:%M:%S'; 
                 $d = date_parse($dd);
-                //$jsdate = "$d[tm_mon]/$d[tm_mday]/$d[tm_year] $d[tm_hour]:$d[tm_min]";
                 $jsdate = "$d[month]/$d[day]/$d[year] $d[hour]:$d[minute]";
-                //print_r($d);
+
                 if ($firstrow) {
                     $firstrow=false;
                 } else {
@@ -41,7 +25,7 @@ function dumpUserFlagDataSet($uid){
             }
         }
         echo ']';
-		$fresult->close();
+
 	}
 }
 
@@ -81,7 +65,15 @@ function dumpTop20($limit=0, $iut="", $lycee=""){
 					echo ",";
 				}
 				//echo ' { "UID": "'.$frow['UID'].'", "score": '.$frow['max_score'].'", "login": '.$frow['login'].'}'; 
-				echo ' { "etablissement": "'.$frow['etablissement'].'", "lycee": "'.$frow['lycee'].'", "login": "'.$frow['login'].'", "UID": "'.$frow['UID'].'", "score": '.$frow['max_score'].'}';                  
+               
+                $object = (object) [
+                    "etablissement" => $frow['etablissement'],
+                    "lycee" => $frow['lycee'],
+                    "login" => $frow['login'],
+                    "UID"   => $frow['UID'],
+                    "score" => $frow['max_score']
+                  ];
+                echo json_encode($object);
 			}
 		
 		echo ']';
