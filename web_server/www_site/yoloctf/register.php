@@ -35,7 +35,7 @@
 
 
 
-    include "ctf_sql.php";
+    include "ctf_sql_pdo.php";
     $uid = $_SESSION['uid'];
 
     //
@@ -52,17 +52,17 @@
             $_SESSION['status'] = 'enabled';
         }
         
-        $request = "UPDATE users SET status = 'enabled' WHERE UID='$arg_uid' AND status='waiting_email_validation'; ";
-        $result = $mysqli->query($request);
-        $count  = $result->affected_rows;
-        if ($result) {
+        $query = "UPDATE users SET status = 'enabled' WHERE UID=:arg_uid AND status='waiting_email_validation'; ";
+        $stmt = $mysqli_pdo->prepare($query);
+        $count  = 0;
+        if ($stmt->execute(['arg_uid' => $arg_uid ])) {
+            $count  = $stmt->rowCount();
+            //echo $count;
             header ('location: index.php?p=Welcome_validated');
-            // yop
-            // redirect : acount xx validated
             exit();
         } else {
-            echo $request;
-            printf("Update failed: %s\n", $mysqli->error);
+            
+            printf("Update failed");
             exit();
         }
     }
@@ -95,17 +95,15 @@
         
         include "ctf_mail.php";
 
-        $login = mysqli_real_escape_string($mysqli, $_POST['login']);
+        $login = $_POST['login'];
         $passwd = md5($_POST['password']);
-        $mail = mysqli_real_escape_string($mysqli, $_POST['mail']);
-        $pseudo = mysqli_real_escape_string($mysqli, $_POST['pseudo']);
+        $mail = $_POST['mail'];
+        $pseudo =  $_POST['pseudo'];
 
 
         // Login already exist ?
-        $request = "SELECT * FROM users WHERE login='" . $login . "'";
-        $result = $mysqli->query($request);
-        $count  = $result->num_rows;
-        if($count>0) {
+        include ("db_requests.php");
+        if(db_login_exists($login)) {
             echo '<body onLoad="alert(\'Ce login est déjà existant\')">';
             echo '<meta http-equiv="refresh" content="0;URL=register.php">';
         }
@@ -122,10 +120,21 @@
             }
             $_SESSION['status'] = $status;
             
-            $request = "INSERT into users (login, passwd, mail, pseudo, UID, status) VALUES ('$login', '$passwd', '$mail','$pseudo', '$uid', '$status')";
-            $result = $mysqli->query($request);
-            $count  = $result->affected_rows;
-            if ($result) {
+
+
+            $query = "INSERT into users (login, passwd, mail, pseudo, UID, status) 
+                VALUES (:login, :passwd, :mail, :pseudo, :uid, :status)";
+            //$result = $mysqli->query($request);
+            //$count  = $result->affected_rows;
+            $stmt = $mysqli_pdo->prepare($query);
+            if ($stmt->execute([
+                    'login' => $login, 
+                    'passwd' => $passwd,
+                    'mail' => $mail,
+                    'pseudo' => $pseudo,
+                    'uid' => $uid,
+                    'status' => $status,
+                ])) {
                 // on enregistre les paramètres de notre visiteur comme variables de session 
                 $_SESSION['login'] = $login;
                 $_SESSION['uid'] = $uid;
@@ -137,7 +146,7 @@
                 }
             } else {
                 echo $request;
-                printf("Insert failed: %s\n", $mysqli->error);
+                printf("Insert failed\n");
                 exit();
             }
             // create user Network

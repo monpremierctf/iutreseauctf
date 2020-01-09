@@ -187,7 +187,8 @@
 
 
 function escapeHtml(unsafe) {
-	if (unsafe ===null) return "";
+	if (unsafe === null) return "";
+	unsafe = unsafe.toString();
     return unsafe
          .replace(/&/g, "&amp;")
          .replace(/</g, "&lt;")

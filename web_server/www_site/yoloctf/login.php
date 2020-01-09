@@ -1,5 +1,9 @@
 <?php
-    
+    /*
+    INPUT
+      $_POST['login']
+      $_POST['password']
+    */
     ini_set('session.cookie_httponly', 1);
     ini_set('session.cookie_secure', 1);
     header_remove("X-Powered-By");
@@ -10,18 +14,21 @@
     require_once('ctf_locale.php');
     if (isset($_POST['login']) && isset($_POST['password'])) {
 
-        include "ctf_sql.php";
+        require_once "ctf_sql_pdo.php";
 
-        $login = mysqli_real_escape_string($mysqli, $_POST['login']);
+        $login = $_POST['login'];
         $passwd = md5($_POST['password']);
-
-        $request = "SELECT * FROM users WHERE login='" . $login . "' and passwd = '". $passwd."'";
+        
+        $query = "SELECT * FROM users WHERE login=:login and passwd = :passwd";
         //echo $request;
-        $result = $mysqli->query($request);
-        $count  = $result->num_rows;
+        $stmt = $mysqli_pdo->prepare($query);
+        $count  = 0;
+        if ($stmt->execute(['login' => $login, 'passwd' => $passwd ])) {
+          $count  = $stmt->rowCount();
+        }
         if($count>0) {
             // dans ce cas, tout est ok, on peut démarrer notre session
-            $row = $result->fetch_array();
+            $row = $stmt->fetch();
             // on enregistre les paramètres de notre visiteur comme variables de session ($login et $pwd) (notez bien que l'on utilise pas le $ pour enregistrer ces variables)
             $_SESSION['login'] = $login;
             $_SESSION['uid'] = $row['UID'];

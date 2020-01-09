@@ -1,9 +1,24 @@
 <?php
-function dumpUserFlagDataSet($uid){
-    require_once "ctf_sql_pdo.php";
+
+
+function db_login_exists($login){
+    require "ctf_sql_pdo.php";
     
-	$count=0;
-    $stmt = $mysqli_pdo->prepare('SELECT UID,CHALLID, fdate, isvalid, flag, score FROM flags WHERE UID=:uid');
+    $query = 'SELECT UID FROM users WHERE login=:login';
+    $stmt = $mysqli_pdo->prepare($query);
+    if ($stmt->execute(['login' => $login ])) {
+        return ( $stmt->rowCount()>0);
+    }
+    return false;
+}
+
+
+function dumpUserFlagDataSet($uid){
+    require "ctf_sql_pdo.php";
+    
+    $count=0;
+    $query = 'SELECT UID,CHALLID, fdate, isvalid, flag, score FROM flags WHERE UID=:uid';
+    $stmt = $mysqli_pdo->prepare($query);
     if ($stmt->execute(['uid' => $uid ])) {
         echo '[';
         $firstrow=true;
@@ -30,42 +45,45 @@ function dumpUserFlagDataSet($uid){
 }
 
 function dumpTop20($limit=0, $iut="", $lycee=""){
-    include "ctf_sql.php";
+    require "ctf_sql_pdo.php";
     
-    
-	$count=0;
+    $count=0;
+    $params=[];
 	$query = "SELECT f.UID, max(score) as max_score, login, etablissement, lycee 
 	FROM flags f 
 		left join users u	on f.UID = u.UID 
 		left join participants p	on f.UID = p.UID 
 	";
 	if ($iut!="") {
-		$query = $query." WHERE etablissement='$iut' ";
+        $query = $query." WHERE etablissement=:iut ";
+        $params['iut']=$iut;
 	}
 	if ($lycee!="") {
 		if ($iut!="") {
-			$query = $query." AND lycee='$lycee' ";
+			$query = $query." AND lycee=:lycee ";
 		} else {
-			$query = $query." WHERE lycee='$lycee' ";
-		}
+			$query = $query." WHERE lycee=:lycee ";
+        }
+        $params['lycee']=$lycee;
 	}
 	$query = $query." GROUP BY UID ORDER BY max(score) DESC ";
 	if ($limit>0) {
-		$query = $query." LIMIT $limit ";
+        $query = $query." LIMIT :limit ";
+        $params['limit']=$limit;
 	}
-	$query = $query." ;";
-	if ($fresult = $mysqli->query($query)) {
-		/* fetch object array */
+    $query = $query." ;";
+    //echo $query;
+    $stmt = $mysqli_pdo->prepare($query);
+    if ($stmt->execute($params)) {
 		echo '[';
 		$firstrow=true;
-		while ($frow = $fresult->fetch_assoc()) {
+		while ($frow = $stmt->fetch()) {
 				if ($firstrow) {
 					$firstrow=false;
 				} else {
 					echo ",";
 				}
-				//echo ' { "UID": "'.$frow['UID'].'", "score": '.$frow['max_score'].'", "login": '.$frow['login'].'}'; 
-               
+                
                 $object = (object) [
                     "etablissement" => $frow['etablissement'],
                     "lycee" => $frow['lycee'],
@@ -73,87 +91,98 @@ function dumpTop20($limit=0, $iut="", $lycee=""){
                     "UID"   => $frow['UID'],
                     "score" => $frow['max_score']
                   ];
+                  //var_dump($frow);
                 echo json_encode($object);
+                //var_dump($frow);
 			}
 		
 		echo ']';
-		$fresult->close();
 	} else {
-
+        echo "nop";
 	}
 }
 
 
 
 function getNbUsers(){
-	include "ctf_sql.php";
+	require "ctf_sql_pdo.php";
 	
-	$user_query = "SELECT count(*) as nbusers FROM users;";
-	if ($user_result = $mysqli->query($user_query)) {
-		$row = $user_result->fetch_assoc();
-		//echo "Error: " . $mysqli->error . "<br>";
-		//echo $row['nbusers'];
-		return $row['nbusers'];
-	}
+    $query = "SELECT count(*) as nbusers FROM users;";
+    $stmt = $mysqli_pdo->prepare($query);
+    if ($stmt->execute()) {
+        if ($frow = $stmt->fetch()) {
+            return $frow['nbusers'];
+        }
+    }
 	return 0;
 }
 
 
 
-    // {"a":1,"b":2,"c":3,"d":4,"e":5}
-    // login, passwd, mail, pseudo, UID, status
-    function dumpUserListJSON(){
-        include "ctf_sql.php";
-        $user_query = "SELECT * FROM users;";
-        if ($result = $mysqli->query($user_query)) {
-            header('Content-Type: application/json');
-            echo '[ ';
-            $isfirstrow=true;
-            while ($row = $result->fetch_assoc()) {
-                if (!$isfirstrow) {
-                    echo ",";
-                } else {
-                    $isfirstrow=false;
-                }
-                echo '{ ';
-                echo '"login":"'.htmlspecialchars($row['login']).'", ';
-                echo '"passwd":"'.htmlspecialchars($row['password']).'", ';
-                echo '"mail":"'.htmlspecialchars($row['mail']).'", ';
-                echo '"pseudo":"'.htmlspecialchars($row['pseudo']).'", '; 
-                echo '"UID":"'.htmlspecialchars($row['UID']).'", ';
-                echo '"status":"'.htmlspecialchars($row['status']).'" ';
-                echo "}\n";
+// 
+function dumpUserListJSON(){
+    require "ctf_sql_pdo.php";
+    $query = "SELECT * FROM users;";
+    $stmt = $mysqli_pdo->prepare($query);
+    if ($stmt->execute()) {
+        header('Content-Type: application/json');
+        echo '[ ';
+        $isfirstrow=true;
+        while ($row = $stmt->fetch()) {
+            if (!$isfirstrow) {
+                echo ",";
+            } else {
+                $isfirstrow=false;
             }
-            echo "]\n";
-            $result->close();
-        }
-        $mysqli->close();
-	}
-	
+            /*
+            echo '{ ';
+            echo '"login":"'.htmlspecialchars($row['login']).'", ';
+            echo '"passwd":"'.htmlspecialchars($row['password']).'", ';
+            echo '"mail":"'.htmlspecialchars($row['mail']).'", ';
+            echo '"pseudo":"'.htmlspecialchars($row['pseudo']).'", '; 
+            echo '"UID":"'.htmlspecialchars($row['UID']).'", ';
+            echo '"status":"'.htmlspecialchars($row['status']).'" ';
+            echo "}\n";
+                */
+            $object = (object) [
+                "login" => $row['login'],
+                "passwd" => $row['password'],
+                "mail" => $row['mail'],
+                "pseudo" => $row['pseudo'],
+                "UID" => $row['UID'],
+                "status" => $row['status']
+              ];
+              //var_dump($frow);
+            echo json_encode($object);
 
-    // {"a":1,"b":2,"c":3,"d":4,"e":5}
-    // login, passwd, mail, pseudo, UID, status
-    function dumpIUTListJSON(){
-        include "ctf_sql.php";
-        $user_query = "SELECT etablissement FROM participants GROUP BY etablissement ;";
-        if ($result = $mysqli->query($user_query)) {
-            header('Content-Type: application/json');
-            echo '[ ';
-            $isfirstrow=true;
-            while ($row = $result->fetch_assoc()) {
-                if (!$isfirstrow) {
-                    echo ",";
-                } else {
-                    $isfirstrow=false;
-                }
-                echo '{ ';
-                echo '"etablissement":"'.htmlspecialchars($row['etablissement']).'" ';
-                echo "}\n";
-            }
-            echo "]\n";
-            $result->close();
         }
-        $mysqli->close();
+        echo "]\n";
     }
+}
+
+
+// {"a":1,"b":2,"c":3,"d":4,"e":5}
+// login, passwd, mail, pseudo, UID, status
+function dumpIUTListJSON(){
+    require "ctf_sql_pdo.php";
+    $query = "SELECT etablissement FROM participants GROUP BY etablissement ;";
+    $stmt = $mysqli_pdo->prepare($query);
+    if ($stmt->execute()) {
+        header('Content-Type: application/json');
+        echo '[ ';
+        $isfirstrow=true;
+        while ($row = $stmt->fetch()) {
+            if (!$isfirstrow) {
+                echo ",";
+            } else {
+                $isfirstrow=false;
+            }
+            echo json_encode($row);
+            echo "\n";
+        }
+        echo "]\n";
+
+    }
+}
 
 ?>

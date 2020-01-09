@@ -408,7 +408,7 @@ if __name__ == '__main__':
     # Init
     nbUserMax = 60
     print ("= Init")
-    scenario_serial("extract_clean.txt", nbUserMax, False, False, 2)
+    scenario_serial("extract_clean.txt", nbUserMax, True, True, 2)
     exit()
 
     # Register users
