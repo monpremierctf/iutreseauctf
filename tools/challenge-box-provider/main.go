@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"errors"
 
 	//	"os"
 	"encoding/json"
@@ -27,11 +27,11 @@ import (
 )
 
 type Challenge struct {
-	Id       string
-	Image    string
-	Port     string
+	Id          string
+	Image       string
+	Port        string
 	TraefikPort string
-	Duration string
+	Duration    string
 }
 
 /*
@@ -239,34 +239,40 @@ func createNewChallengeBox(requestId int, box string, duration string, port stri
 	ctx := context.Background()
 
 	// Labels
+	// PathPrefix:/dvwa/;ReplacePathRegex: ^/dvwa/(.*) /$1
+
 	labels := map[string]string{
 		"ctf-uid":               fmt.Sprintf("CTF_UID_%s", uid),
 		"ctf-start-time":        time.Now().Format("2006-01-02 15:04:05"),
 		"ctf-duration":          duration,
-		"traefik.enable":        "true",                                      //traefik.enable=true
+		"traefik.enable":        "true",
 		"traefik.frontend.rule": fmt.Sprintf("PathPrefix:/%s_%s/", box, uid), //traefik.frontend.rule=Path:/yoloboard
 		"traefik.port":          fmt.Sprintf("%s", traefik_port),
 	}
 	env := []string{}
 
 	if box == "ctf-tool-xterm" {
-		log.Printf("[%d][%s] createNewChallengeBox ctf-tool-xterm : set URLPREFIX, add webserver_webLAN", requestId, string(uid))
+		log.Printf("[%d][%s] createNewChallengeBox ctf-tool-xterm : set URLPREFIX, add traefik_challsLAN", requestId, string(uid))
 		env = append(env, fmt.Sprintf("URLPREFIX=/%s_%s", box, uid))
-		labels["traefik.docker.network"] = "webserver_webLAN"
+		labels["traefik.docker.network"] = "traefik_challsLAN"
 	}
 	if box == "ctf-python" {
-		log.Printf("[%d][%s] createNewChallengeBox ctf-python : add webserver_webLAN", requestId, string(uid))
-		//env = append(env, fmt.Sprintf("URLPREFIX=/%s_%s", box, uid))
-		labels["traefik.docker.network"] = "webserver_webLAN"
+		log.Printf("[%d][%s] createNewChallengeBox ctf-python : add traefik_challsLAN", requestId, string(uid))
+		labels["traefik.docker.network"] = "traefik_challsLAN"
 
 	}
+	if ( (box == "ctf-dvwa") || (box == "ctf-demo") || (box == "ctf-alex-js") ) {
+		log.Printf("[%d][%s] createNewChallengeBox %d : add traefik_challsLAN", requestId, string(uid), box)
+		labels["traefik.docker.network"] = "traefik_challsLAN"
+		labels["traefik.frontend.rule"] = fmt.Sprintf("PathPrefix:/%s_%s/;ReplacePathRegex: ^/%s_%s/(.*) /$1", box, uid, box, uid)
 
+	}
 	// Disable security for ctf-buffer
 	// --security-opt seccomp=unconfined
 	// docker run -it  --security-opt seccomp=unconfined ctf-buffer:latest /bin/bash
 	secopt := []string{}
 	if box == "ctf-buffer" {
-		secopt = []string{ "seccomp=unconfined"}
+		secopt = []string{"seccomp=unconfined"}
 	}
 
 	// Port binding
@@ -290,8 +296,8 @@ func createNewChallengeBox(requestId int, box string, duration string, port stri
 
 	// Create
 	//storageOpt := map[string]string{"size": "2G"}
-	if (challID == "") {
-			
+	if challID == "" {
+
 		resp, err := dockerClient.ContainerCreate(ctx,
 			&container.Config{
 				Image:    box,
@@ -327,23 +333,20 @@ func createNewChallengeBox(requestId int, box string, duration string, port stri
 		}
 		challID = resp.ID
 
-
-		// If xterm, add webLAN
-		if (box == "ctf-tool-xterm" ) {
-			nidweb := getNetworkId("webserver_webLAN")
+		// If xterm, add traefik_challsLAN
+		if box == "ctf-tool-xterm" {
+			nidweb := getNetworkId("traefik_challsLAN")
 			if err := dockerClient.NetworkConnect(ctx, nidweb, challID, nil); err != nil {
 				panic(err)
 			}
 		}
-		// If xterm, add webLAN
-		if (box == "ctf-python" ) {
-			nidweb := getNetworkId("webserver_webLAN")
+		// If ctf-python, add traefik_challsLAN
+		if ( (box == "ctf-python") || (box == "ctf-dvwa") || (box == "ctf-demo") || (box == "ctf-alex-js") ) {
+			nidweb := getNetworkId("traefik_challsLAN")
 			if err := dockerClient.NetworkConnect(ctx, nidweb, challID, nil); err != nil {
 				panic(err)
 			}
 		}
-
-
 
 		// Add user network
 		nid := getNetworkIdFromUID(uid)
@@ -365,7 +368,7 @@ func createNewChallengeBox(requestId int, box string, duration string, port stri
 			panic(err)
 		}
 	}
-	
+
 	// Start container
 	start2 := time.Now().Unix()
 	log.Printf("[%d][%s] createNewChallengeBox Calling ContainerStart", requestId, string(uid))
@@ -403,16 +406,16 @@ func createNewUserNet(uid string, duration int) (containerID string, err2 error)
 		Subnet:  fmt.Sprintf("%d.%d.0.0/16", net_1, net_2),
 		Gateway: fmt.Sprintf("%d.%d.0.1", net_1, net_2),
 	}
-	for  try_create:=true; try_create; {
+	for try_create := true; try_create; {
 		net_2++
 		if net_2 > 250 {
 			net_1++
 			net_2 = 10
 		}
 		if net_1 > 250 {
-			containerID=""
+			containerID = ""
 			err2 = errors.New("No more IP network")
-			return;
+			return
 		}
 		ipamConfig = network.IPAMConfig{
 			Subnet:  fmt.Sprintf("%d.%d.0.0/16", net_1, net_2),
@@ -543,7 +546,6 @@ func getChallengeBox(box string, uid string) (containerID string) {
 	}
 	return
 }
-
 
 func getAllChallengeBox(box string, uid string) (containerID string) {
 	containerID = ""

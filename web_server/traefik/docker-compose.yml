@@ -12,6 +12,7 @@ services:
     networks:
       - webserver_webLAN
       - default
+      - traefik_challsLAN
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik.toml:/traefik.toml
@@ -33,4 +34,6 @@ services:
 
 networks:
   webserver_webLAN:
+    external: true
+  traefik_challsLAN:
     external: true

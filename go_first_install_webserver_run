@@ -307,6 +307,12 @@ fi
 
 ctf_gen_config() {
 
+echo " "
+echo " --------------------------------------------------------------------"
+echo "|"
+echo "| Generation de la configuration..."
+echo "|"
+
 if [ ! -f challenges_list.cfg ]; then
   cp challenges_list.cfg.default challenges_list.config
 fi
@@ -354,9 +360,11 @@ cd -
 #
 # Verification de la configuration
 #
-echo "===================="
-echo "Verification de la configuration"
-echo ""
+echo " "
+echo " --------------------------------------------------------------------"
+echo "|"
+echo "| Verification de la configuration"
+echo "|"
 python -c 'from gen_config import dump_challenges_env; dump_challenges_env()'
 echo ''
 echo '[web_server/.env]'
@@ -393,11 +401,19 @@ fi
 #
 # Create docker netkorks
 # 
-docker network create webserver_webLAN   2>/dev/null
+docker network create --internal webserver_webLAN   2>/dev/null
+docker network create --internal traefik_challsLAN     2>/dev/null
 
 
 ctf_build_all() {
-  #
+
+echo " "
+echo " --------------------------------------------------------------------"
+echo "|"
+echo "| Build CTF docker images..."
+echo "|"
+
+#
 # Build challenge-box-provider
 #
 #cd challenge-box-provider
@@ -407,35 +423,28 @@ ctf_build_all() {
 
 
 
-#
-# Build ctf-sshd
-#
-
-echo "Building ctf-sshd image"
-cd tools/ctf-sshd
-docker build -t ctf-sshd .
-cd - > /dev/null
-
 
 #
-# Build ctf-python-editor
+# Build ctf-tools
 #
+CTFTOOLS="ctf-sshd ctf-php-nginx ctf-python-editor"
+for TOOL in $CTFTOOLS; do
+  echo "|"
+  echo "| Building $TOOL"
+  echo "|"
+  cd tools/$TOOL
+  docker build -t $TOOL .
+  cd - > /dev/null
+done
 
-echo "Building ctf-php-nginx image"
-cd tools/ctf-php-nginx
-docker build -t ctf-php-nginx .
-cd - > /dev/null
-echo "Building ctf-python-editor image"
-cd tools/ctf-python-editor
-docker build -t ctf-python-editor .
-cd - > /dev/null
- 
 
 #
 # Build xtermjs
 #
 
-echo "Building ctf-tools-xtermjs image"
+echo "|"
+echo "| Building ctf-tools-xtermjs"
+echo "|"
 cd tools/xterm
 ./go_xterm
 cd - > /dev/null
@@ -450,7 +459,10 @@ cd - > /dev/null
 #
 # Build dockers images for challenges
 #
-
+echo " "
+echo "|"
+echo "| Build challenges..."
+echo "|"
 python -c 'from gen_config import build_challenges; build_challenges()'
 #python -c 'from gen_config import start_challenges; start_challenges()'
  
@@ -460,7 +472,10 @@ python -c 'from gen_config import build_challenges; build_challenges()'
 #
 # Generate self-signed certificates
 #
-
+echo " "
+echo "|"
+echo "| Generate certs  and build traefik..."
+echo "|"
 if [ $TRAEFIK_SELF_SIGNED_CERTS == 1 ] 
 then
   cd web_server/traefik
@@ -627,6 +642,13 @@ fi
 #
 
 ctf_start() {
+
+echo " "
+echo " --------------------------------------------------------------------"
+echo "|"
+echo "| Starting traefik..."
+echo "|"
+
 #
 # Start traefik
 #
@@ -640,6 +662,9 @@ fi
 #
 # Start web_server
 #
+echo "|"
+echo "| Starting web server..."
+echo "|"
 cd web_server
 docker-compose up -d
 cd - > /dev/null
@@ -650,6 +675,9 @@ cd - > /dev/null
 #
 # Start challenge box provider
 #
+echo "|"
+echo "| Starting challenge box provider..."
+echo "|"
 cd tools/challenge-box-provider
 docker-compose up -d
 cd - > /dev/null
@@ -663,12 +691,18 @@ cd - > /dev/null
 #cd ctf-passwd
 #docker-compose up -d
 #cd - > /dev/null
+echo "|"
+echo "| Starting shared challenges..."
+echo "|"
 for CHALL in $CTF_CHALL_LIST; do
   if [ -f "$CHALL/challenge_start.sh" ]; then
     printf "Running ${CHALL}/challenge_start.sh\n"
     cd $CHALL
     #. .env
     ./challenge_start.sh
+    if [ $? -gt 0 ]; then
+      printf "${RED}Pb detected${NC}\n"; 
+    fi
     cd - > /dev/null
   fi
 done
@@ -680,7 +714,8 @@ done
 # docker-compose logs
 # docker stats
 
-echo "*****************"
+echo " "
+echo "--------------------------------------------------------------------"
 echo ""
 echo "S'il n'y a pas eu de message d'erreur, vous pouvez à présent vous connecter à l'interface web:"
 echo "http://localhost/yoloctf/"
@@ -693,7 +728,7 @@ echo "password admin : $CTF_ADMIN_PASSWORD"
 }
 
 if [ ! $NORUN == 1 ]; then
-ctf_start
+  ctf_start
 fi
 
 

@@ -181,6 +181,7 @@ function html_dump_cat($cat) {
           print getLocalizedIndex($c, 'name');
           print "</div>";
           print '<div class="col-sm text-right">';
+          if ($c['auteur'] !=="") { print ("Auteur : ".$c['auteur']." - "); }
           print ($c['value']);
           print "</div>";
         print "</div>";

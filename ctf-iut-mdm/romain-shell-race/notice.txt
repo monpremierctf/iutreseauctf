@@ -1,0 +1,15 @@
+Bonjour,
+
+et bienvenu dans cet énigme.
+
+Ce programme a pour but de génerer un nombre aléatoire a diviser par 7 et a ecrire ce résultat 
+sous 0.5 seconde dans le fichier "resultat.txt" situé dans ce dossier !!!
+
+Vous pouvez utiliser nano pour ouvrir des fichiers et ainsi les écrire !!!
+De plus avec la commande : <nomdufichier.X> avec X le format de fichier utilisé (txt,sh,py,java,...) !!!
+
+Compétences nécessaires :
+-redirection;
+-pipe;
+-programmation basique;
+

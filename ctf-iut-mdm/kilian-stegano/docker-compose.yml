@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  steganopierre:
+    build: . 
+    image: ctf-steganopierre
+    restart: always
+    ports:
+      - "1234:22"

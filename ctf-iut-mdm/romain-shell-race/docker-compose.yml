@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  pjtut-engm1:
+    build: . 
+    image: ctf-romain-race
+    restart: always
+    ports:
+      - "3333:22"

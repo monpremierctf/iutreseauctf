@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  pjtut-totor:
+    build: . 
+    image: ctf-alexis
+    restart: always
+    ports:
+      - "3232:22"

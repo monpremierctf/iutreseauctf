@@ -1,3 +1,4 @@
+# coding: utf8
 #!/bin/python
 
 # 
@@ -92,11 +93,15 @@ def challenges_set_config():
 def build_challenges():
     #print "Build [ctf-sshd]"
     #(Popen(["docker", "build", "-t","ctf-sshd","./ctf-sshd"], stdout=sys.stdout, stderr=sys.stderr)).communicate()
-    print "Build [ctf-transfert]"
+    print "|"
+    print "| Build [ctf-transfert]"
+    print "|"
     (Popen(["docker", "build", "-t","ctf-transfert","./ctf-transfert"], stdout=sys.stdout, stderr=sys.stderr)).communicate()
     read_challenges_dir_list()
     for challenge_dir in challenges_dir_list:
-        print "Build ["+challenge_dir+"]"
+        print "|"
+        print "| Build ["+challenge_dir+"]"
+        print "|"
         if (os.path.isfile(challenge_dir+'/docker-compose.yml')):
             (Popen(["docker-compose", "build"], stdout=sys.stdout, stderr=sys.stderr, cwd=challenge_dir)).communicate()
         else:
@@ -105,7 +110,9 @@ def build_challenges():
 def start_challenges():
     read_challenges_dir_list()
     for challenge_dir in challenges_dir_list:
-        print "Start ["+challenge_dir+"]"
+        print "|"
+        print "| Start ["+challenge_dir+"]"
+        print "|"
         if (os.path.isfile(challenge_dir+'/docker-compose.yml')):
             (Popen(["docker-compose", "up", "-d"], stdout=sys.stdout, stderr=sys.stderr, cwd=challenge_dir)).communicate()
         else:
@@ -197,30 +204,31 @@ def add_intro(challenge_dir, label, label_en, desc, desc_en, category, docker):
     #desc = replace_crlf_by_br(desc)
     intros.append({
         "dir": str(challenge_dir), 
-        "label": str(label), 
-        "label_en": str(label_en), 
-        "category": str(category), 
+        "label": label.decode('utf-8'), 
+        "label_en": label_en.decode('utf-8'), 
+        "category": category.decode('utf-8'), 
         "docker": str(docker),
         "description": desc.decode('utf-8'),
         "description_en": desc_en.decode('utf-8')
     })
 
-def add_challenge(name, name_en, desc, desc_en, value, category, docker):
+def add_challenge(name, name_en, desc, desc_en, value, category, docker, auteur):
     global challenge_id
     challenge_id+=1
     challenges.append({
         "id": int(challenge_id), 
-        "name": str(name), 
-        "name_en": str(name_en), 
-        "description": str(desc), 
-        "description_en": str(desc_en), 
+        "name": name.decode('utf-8'), 
+        "name_en": name_en.decode('utf-8'), 
+        "description": desc.decode('utf-8'), 
+        "description_en": desc_en.decode('utf-8'), 
         "max_attempts": 0, 
         "value": int (value), 
-        "category": str(category), 
+        "category": category.decode('utf-8'), 
         "type": "standard", 
         "state": "visible", 
         "requirements": "null",
-        "docker": str(docker)
+        "docker": str(docker),
+        "auteur": auteur.decode('utf-8')
     })
 
 def add_flag(flag):
@@ -354,9 +362,10 @@ def parse_dir(challenge_dir):
             hint_en = getParam(config, challenge, 'hint_en')
             hint1_en = getParam(config, challenge, 'hint1_en')
             hint2_en = getParam(config, challenge, 'hint2_en')
+            auteur = getParam(config, challenge, 'auteur')
             #print(name)
             #print (description)
-            add_challenge(name, name_en, desc, desc_en, value, category, docker)
+            add_challenge(name, name_en, desc, desc_en, value, category, docker, auteur)
             add_flag(flag)
             add_flag(flag2)
             add_flag(flag3)
@@ -387,7 +396,9 @@ if __name__ == '__main__':
         str_ = json.dumps(challenges,
                         indent=4, sort_keys=False,
                         separators=(',', ': '), ensure_ascii=False)
-        outfile.write(unicode(str_.decode('utf-8')))
+        str_ = str_.encode('utf8')
+        stru_ = unicode(str_, 'utf8')
+        outfile.write((stru_))
         outfile.write(unicode(', "meta": {}}'))
 
     with io.open(out_dir+'flags.json', 'w', encoding='utf8') as outfile:
@@ -395,7 +406,8 @@ if __name__ == '__main__':
         str_ = json.dumps(flags,
                         indent=4, sort_keys=True,
                         separators=(',', ': '), ensure_ascii=False)
-        outfile.write(unicode(str_))
+        stru_ = unicode(str_, 'utf8')
+        outfile.write((stru_))
         outfile.write(unicode(', "meta": {}}'))
 
     with io.open(out_dir+'files.json', 'w', encoding='utf8') as outfile:
@@ -403,7 +415,8 @@ if __name__ == '__main__':
         str_ = json.dumps(files,
                         indent=4, sort_keys=True,
                         separators=(',', ': '), ensure_ascii=False)
-        outfile.write(unicode(str_))
+        stru_ = unicode(str_, 'utf8')
+        outfile.write((stru_))
         outfile.write(unicode(', "meta": {}}'))
 
     with io.open(out_dir+'hints.json', 'w', encoding='utf8') as outfile:
@@ -411,7 +424,9 @@ if __name__ == '__main__':
         str_ = json.dumps(hints,
                         indent=4, sort_keys=False,
                         separators=(',', ': '), ensure_ascii=False)
-        outfile.write(unicode(str_))
+        str_ = str_.encode('utf8')
+        stru_ = unicode(str_, 'utf8')
+        outfile.write((stru_))
         outfile.write(unicode(', "meta": {}}'))
 
     if not os.path.exists('web_server/www_site/yoloctf/db/'):
@@ -425,5 +440,6 @@ if __name__ == '__main__':
                         separators=(',', ': '), ensure_ascii=False)
         #print(str_)
         #outfile.write(unicode(str_, errors='ignore'))
-        outfile.write(str_)
+        
+        outfile.write((str_))
         outfile.write(unicode(', "meta": {}}'))

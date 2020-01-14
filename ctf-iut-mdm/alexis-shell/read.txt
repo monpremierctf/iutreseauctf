@@ -1,0 +1,11 @@
+À partir de maintenant, je vais t'aider à l'introduction des commandes de base shell.
+
+
+Commençons.
+
+
+En faisant la commande ls juste avant, tu as vu qu'il y avait un dossier.
+
+Tu peux y accéder avec la commande cd <Nom du dossier>.
+
+Je te conseille de refaire un petit ls ensuite...
