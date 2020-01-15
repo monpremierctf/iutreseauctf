@@ -1,0 +1,16 @@
+#
+#
+# La valeur de PORT-SSH est définie dans .env
+#
+version: '2'
+
+services:
+
+  dns:
+    build: . 
+    image: ctf-mdm-dns
+    ports:
+      - "${PORT_HTTP}:80"
+
+
+

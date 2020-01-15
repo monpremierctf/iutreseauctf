@@ -261,7 +261,7 @@ func createNewChallengeBox(requestId int, box string, duration string, port stri
 		labels["traefik.docker.network"] = "traefik_challsLAN"
 
 	}
-	if ( (box == "ctf-dvwa") || (box == "ctf-demo") || (box == "ctf-alex-js") ) {
+	if ( (box == "ctf-dvwa") || (box == "ctf-demo") || (box == "ctf-alex-js") || (box == "ctf-mdm-dns") ) {
 		log.Printf("[%d][%s] createNewChallengeBox %d : add traefik_challsLAN", requestId, string(uid), box)
 		labels["traefik.docker.network"] = "traefik_challsLAN"
 		labels["traefik.frontend.rule"] = fmt.Sprintf("PathPrefix:/%s_%s/;ReplacePathRegex: ^/%s_%s/(.*) /$1", box, uid, box, uid)
@@ -341,7 +341,7 @@ func createNewChallengeBox(requestId int, box string, duration string, port stri
 			}
 		}
 		// If ctf-python, add traefik_challsLAN
-		if ( (box == "ctf-python") || (box == "ctf-dvwa") || (box == "ctf-demo") || (box == "ctf-alex-js") ) {
+		if ( (box == "ctf-python") || (box == "ctf-dvwa") || (box == "ctf-demo") || (box == "ctf-alex-js")  || (box == "ctf-mdm-dns")  ) {
 			nidweb := getNetworkId("traefik_challsLAN")
 			if err := dockerClient.NetworkConnect(ctx, nidweb, challID, nil); err != nil {
 				panic(err)
