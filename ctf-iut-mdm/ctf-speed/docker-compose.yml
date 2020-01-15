@@ -9,6 +9,6 @@ services:
   ctf-mdm-speed:
     build: . 
     image: ctf-mdm-speed
-    restart: always
-    ports:
-      - "${PORT_SSH}:22"
+    #restart: always
+    #ports:
+    #  - "${PORT_SSH}:22"

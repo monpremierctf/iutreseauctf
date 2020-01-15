@@ -9,8 +9,8 @@ services:
   dns:
     build: . 
     image: ctf-mdm-dns
-    ports:
-      - "${PORT_HTTP}:80"
+    #ports:
+    #  - "${PORT_HTTP}:80"
 
 
 
