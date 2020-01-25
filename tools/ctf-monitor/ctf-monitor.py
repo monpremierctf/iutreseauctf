@@ -5,7 +5,7 @@ import docker
 from ctf_load import getHostCPU, getHostMem
 from ctf_docker import listContainers, getContainerCount , getcontainerSummary
 import json
-
+import argparse
 
 
 class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
@@ -39,13 +39,29 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         else:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b'Ready to serve'+self.path.encode())   
+            self.wfile.write(b'Ready to serve ['+self.path.encode()+b"]")   
         
 
 #
 # Main
 #
 if __name__ == '__main__':
-    
-    httpd = HTTPServer(('172.28.0.1', 7000), MySimpleHTTPRequestHandler)
+    ip = '0.0.0.0'
+    port = 7000
+    my_parser = argparse.ArgumentParser()
+    my_parser.add_argument('-ip', action='store')
+    my_parser.add_argument('-port', action='store')
+    args = my_parser.parse_args()
+    if (args.ip):
+        ip = args.ip
+    if (args.port):
+        port = args.port
+    print(vars(args))
+    print ("===========================")
+    print ("| CTF Host Monitor")
+    print ("|")
+    print ("Listening on "+ip+":"+str(port))
+    print ("")
+    exit
+    httpd = HTTPServer((ip, port), MySimpleHTTPRequestHandler)
     httpd.serve_forever()

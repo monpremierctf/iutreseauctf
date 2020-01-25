@@ -1,0 +1,1 @@
+python3 ctf-monitor.py &
