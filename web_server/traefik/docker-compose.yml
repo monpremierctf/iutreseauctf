@@ -37,5 +37,3 @@ networks:
     external: true
   traefik_challsLAN:
     external: true
-  default:
-    external: true

@@ -70,9 +70,6 @@ def register_user(user, login, password, mail, code):
     # On est d accord, pas de test avec une balise html comme nom.. hein ?
     if (resp.text.find(login)>0):
         return True
-    print("REGISTER : KO")
-    print(resp.text.partition('\n')[0] + '...')
-    print("\n")
     return False
 
 
@@ -85,10 +82,8 @@ def login_user(user, login,password):
     payload = {'login':login, 'password':password}
     resp = user.session.post(url='https://localhost/yoloctf/login.php', data=payload)
     #print resp.text
-    if (resp.text.find('Logout')>0):
+    if (resp.text.find(login)>0):
         return True
-    print("LOGIN : KO")
-    print(resp.text + '...')
     return False
 
 
@@ -198,12 +193,11 @@ def scenario_serial(exportfileName, nbUserMax, noxterm, nocontainer, maxsleep):
         print ("Registering "+str(nbUserMax)+" users : ")
         for x in range(nbUserMax):
             user1  = UserSession()
-            if (register_user(user1, user1.login, user1.password, user1.mail, 'YOLO')):
+            if (register_user(user1, user1.login, user1.password, user1.mail, 'IUTCTF')):
                 users.append(user1)
                 print "."+str(user1.id)
             else:
                 print "Pb register "+str(user1.id)+". "
-		exit(1)
         print ("Registered "+str(len(users))+" users.")
     else:
         print("Using user file")
@@ -372,7 +366,7 @@ def run_user_journey(u, flags):
 
 thread_list = []
 
-def scenario_parallel(nbUserMax):
+def scenario_parallel(exportfileName, nbUserMax):
     init()
     flags = load_flags()
     for x in range(nbUserMax):
@@ -407,16 +401,15 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, service_shutdown)
 
     # Init
-    nbUserMax = 10
+    nbUserMax = 60
     print ("= Init")
-    #scenario_serial("extract_clean.txt", nbUserMax, True, True, 2)
-    scenario_serial("", nbUserMax, False, False, 1)
-    exit()
+    #scenario_serial("extract_clean.txt", nbUserMax, False, False, 2)
+    #exit()
 
     # Register users
 
     try:
-        scenario_parallel(nbUserMax)
+        scenario_parallel("extract_clean.txt", nbUserMax)
         while True:
             time.sleep(0.5)
     except ServiceExit:

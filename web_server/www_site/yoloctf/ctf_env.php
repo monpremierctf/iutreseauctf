@@ -25,4 +25,7 @@
     $ctf_url1 = getenv('CTF_URL_1')?getenv('CTF_URL_1'):'';
     $ctf_url2 = getenv('CTF_URL_2')?getenv('CTF_URL_2'):'';
     $ctf_url3 = getenv('CTF_URL_3')?getenv('CTF_URL_3'):'';
+
+    $ReCaptchaEnabled = False;
+    $CSRFGuardEnabled = True;
 ?>

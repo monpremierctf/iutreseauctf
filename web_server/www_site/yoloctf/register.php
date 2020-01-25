@@ -1,4 +1,8 @@
 <?php
+   include "ctf_env.php";
+   if (isset($CSRFGuardEnabled)&&($CSRFGuardEnabled == True)) {
+     include "csrfguard.php";
+   }
 /*
     INPUT: 
         $_GET['validate']
@@ -168,6 +172,7 @@
 <body>
 
 <?php
+    include "ctf_env.php";
     include "Parsedown.php";
     $Parsedown = new Parsedown();
 ?>
@@ -217,6 +222,12 @@
 		  <input type="text" class="col-6 form-control" id="code" name="code">
           <label for="usr" class="col-2"></label>
 		</div>
+        <?php } ?>
+        <?php  if (isset($ReCaptchaEnabled)&&($ReCaptchaEnabled == True)) { ?>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <div class="field">
+               <div class="g-recaptcha" data-sitekey="6LdAw9EUAAAAAGLowra3GcVcI-gfCk7B1465Q0z3"></div>
+        </div>
         <?php } ?>
 		<button type="submit" class="btn btn-primary" onclick="return checkRegisterForm()">Register</button>
 	  </form>

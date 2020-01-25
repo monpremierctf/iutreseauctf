@@ -1,4 +1,8 @@
 <?php
+  include "ctf_env.php";
+  if (isset($CSRFGuardEnabled)&&($CSRFGuardEnabled == True)) {
+    include "csrfguard.php";
+  }
     /*
     INPUT
       $_POST['login']
@@ -63,6 +67,7 @@
 <?php
     include "ctf_challenges.php";
     include "Parsedown.php";
+    
     $Parsedown = new Parsedown();
 ?>
 
@@ -98,6 +103,15 @@
         <div class="form-group text-left">
 		  <label for="usr">Password</label>
 		  <input type="password" class="form-control" id="password" name="password">
+      
+
+      <?php  if (isset($ReCaptchaEnabled)&&($ReCaptchaEnabled == True)) { ?>
+      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+      <div class="field">
+          <label for="usr">Verification</label>
+					<div class="g-recaptcha" data-sitekey="6LdAw9EUAAAAAGLowra3GcVcI-gfCk7B1465Q0z3"></div>
+        </div>
+      <?php } ?>
 		</div>
 		<button type="submit" class="btn btn-primary">Login</button>
 	  </form>
