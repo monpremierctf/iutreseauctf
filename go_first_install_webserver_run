@@ -403,7 +403,7 @@ fi
 # 
 docker network create --internal webserver_webLAN   2>/dev/null
 docker network create --internal traefik_challsLAN     2>/dev/null
-
+IPTRAEFIKGW="$(docker inspect traefik_challsLAN | grep Gateway | cut -d'"' -f4)"
 
 ctf_build_all() {
 
@@ -725,6 +725,7 @@ echo ""
 echo ""
 echo "compte admin   : $CTF_ADMIN_ACCOUNT"
 echo "password admin : $CTF_ADMIN_PASSWORD"
+echo "Traefik Gw     : $IPTRAEFIKGW"
 }
 
 if [ ! $NORUN == 1 ]; then

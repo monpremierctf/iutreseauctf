@@ -198,11 +198,12 @@ def scenario_serial(exportfileName, nbUserMax, noxterm, nocontainer, maxsleep):
         print ("Registering "+str(nbUserMax)+" users : ")
         for x in range(nbUserMax):
             user1  = UserSession()
-            if (register_user(user1, user1.login, user1.password, user1.mail, 'IUTCTF')):
+            if (register_user(user1, user1.login, user1.password, user1.mail, 'YOLO')):
                 users.append(user1)
                 print "."+str(user1.id)
             else:
                 print "Pb register "+str(user1.id)+". "
+		exit(1)
         print ("Registered "+str(len(users))+" users.")
     else:
         print("Using user file")
@@ -406,9 +407,10 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, service_shutdown)
 
     # Init
-    nbUserMax = 60
+    nbUserMax = 10
     print ("= Init")
-    scenario_serial("extract_clean.txt", nbUserMax, True, True, 2)
+    #scenario_serial("extract_clean.txt", nbUserMax, True, True, 2)
+    scenario_serial("", nbUserMax, False, False, 1)
     exit()
 
     # Register users
