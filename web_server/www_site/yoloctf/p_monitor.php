@@ -15,7 +15,7 @@
       </div>
         <div class="form-group text-left row">
 		  <label for="usr" class="col-2">CPU</label>
-		  <label for="usr" class="col-2" id="idCPU" name="id">...</label>
+		  <label for="usr" class="col-1" id="idCPU" name="id">...</label>
 
 				<div class="col-6">
 					<canvas id='canvas_00'></canvas>
@@ -33,7 +33,7 @@
 		  <label for="usr" class="col-2">Disk</label>
           <label for="usr" class="col-6" id="idDisk" name="id">...</label>
         </div>
-        <button type="submit" class="btn btn-primary" onclick="refreshCPUChart()">Refresh</button>      
+        <button type="submit" class="btn btn-primary" onclick="refreshButton()">Refresh</button>      
      
     </div>
 
@@ -68,6 +68,26 @@
 <hr>
 </div>
 
+<!---- Logs  --->
+<div class="">
+    <div class="row chall-titre bg-secondary text-white">
+        <div class="col-sm text-left">Logs</div>
+    </div>
+    <button type="submit" class="btn btn-primary" onclick="refreshButtonChallProvider()">Challenge Provider</button>   
+    <button type="submit" class="btn btn-primary" onclick="refreshButtonMySQL()">MySQL</button>   
+    <div class="form-group text-left row">
+            <div id="idLogs" class='panel-body bg-light' style='height: 300px; width: 100%; overflow-y: scroll;'>...</div>
+    </div>
+
+</div>
+
+<div class="form-group text-left  row ">
+<hr>
+</div>
+
+         
+
+
 <script>
 /* 
         "/containerCount":  getContainerCount,
@@ -79,14 +99,20 @@
             "used": 4847341568, "free": 2265042944, "active": 5633941504, "inactive": 1526718464, "buffers": 128135168, "cached": 3112116224, "shared": 245706752, "slab": 642584576}
         "/hostCPU": getHostCPU
         */
-        function getStatFromServer(elementId, urlParam, jsonParam)
+        function getStatFromServer(elementId, urlParam, jsonParam, replaceCRLF=false, insertHTML=false)
         {
             var url = "https://"+ window.location.hostname+"/stats/"+urlParam;
             $.get(url, function( data, status ) {
                 try {
                     var jsondata = data; //$.parseJSON(data);
                     if (jsondata.hasOwnProperty(jsonParam)) { 
-                        $(elementId).text(jsondata[jsonParam]);
+                        var txt = jsondata[jsonParam];
+                        if (replaceCRLF) { txt = txt.replace(/(?:\r\n|\r|\n)/g, '<br>'); }
+                        if (insertHTML) {
+                            $(elementId).html(txt);
+                        } else {
+                            $(elementId).text(txt);
+                        }
                     } else {
                         $(elementId).text(data);       
                     }       
@@ -109,7 +135,7 @@
         {
             var url = "https://"+ window.location.hostname+"/stats/hostMem";
             $.get(url, function( data, status ) {
-                var jsondata = data; //$.parseJSON(data); 
+                var jsondata = data;  
                 $("#idMem_total").text("Total: "+toMB(jsondata["total"])+" MB");     
                 $("#idMem_available").text("Available: "+toMB(jsondata["available"])+" MB");    
                 $("#idMem_percent").text(jsondata["percent"]+" % Used");    
@@ -119,7 +145,21 @@
                 $("#idMem_total").text(ret); 
             });        
         }
-
+        function getHostDisk()
+        {
+            var url = "https://"+ window.location.hostname+"/stats/hostDisk";
+            $.get(url, function( data, status ) {
+                var jsondata = data;  
+                var ret = jsondata['df'];
+                ret = ret.replace(/(?:\r\n|\r|\n)/g, '<br>');
+                $("#idDisk").html(ret);     
+  
+            })
+            .fail(function(XMLHttpRequest, textStatus, errorThrown) {
+                var ret = JSON.parse(XMLHttpRequest.responseText);
+                $("#idMem_total").text(ret); 
+            });        
+        }
         function getContainerSummary()
         {
             var url = "https://"+ window.location.hostname+"/stats/containerSummary";
@@ -188,7 +228,11 @@
 						scaleLabel: {
 							display: true,
 							labelString: '%CPU'
-						}
+						},
+                        ticks: {
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
 					}]
 				},
 			}
@@ -224,15 +268,29 @@
 	window.onload = function() {
         getStatFromServer("#idCPU", "hostCPU","cpu_percent");
         getHostMem();
-        //getStatFromServer("#idDisk", "containerCount","count");
+        getHostDisk();
 
         getStatFromServer("#idContainer_count", "containerCount","count");
         getContainerSummary();
 
 		initCPUChart();
         addCPUDataset(l_00);
+        refreshCPUChart();
 	}
 
+    function refreshButtonChallProvider() {
+        getStatFromServer("#idLogs", "challengeProviderLogs","logs", true, true);
+    }
+    function refreshButtonMySQL() {
+        getStatFromServer("#idLogs", "challengeProviderLogs","logs");
+    }
+    function refreshButton(){
+        getHostMem();
+        getHostDisk();
+
+        getStatFromServer("#idContainer_count", "containerCount","count");
+        getContainerSummary();
+    }
     var optionsAnimation = {
         //Boolean - If we want to override with a hard coded scale
         scaleOverride : true,
@@ -257,7 +315,8 @@
                 + currentdate.getMinutes() + ":" 
                 + currentdate.getSeconds();
         var entry = { x: datetime, y: val};
-        cpu_dataset.push(entry);    
+        cpu_dataset.push(entry); 
+        if (cpu_dataset.length>200) { cpu_dataset.shift();}
         l_00.data.datasets.shift();
         l_00.data.datasets.push(dataset);
 		l_00.update();
@@ -268,17 +327,19 @@
             $.get(url, function( data, status ) {
                 var jsondata = data; 
                 addCPUChartEntry(jsondata['cpu_percent']);
+                $("#idCPU").text(jsondata['cpu_percent']); 
             })
             .fail(function(XMLHttpRequest, textStatus, errorThrown) {
                 //var ret = JSON.parse(XMLHttpRequest.responseText);
                 //$("#idCPU").text(ret); 
             });   
 		//addCPUChartEntry(getRandomInt(10));
+        setTimeout(function(){
+            refreshCPUChart();
+        }, 5000
+    );
 	}
 
-    setInterval(function(){
-        refreshCPUChart();
-        }, 2000
-    );
+    
 
     </script>

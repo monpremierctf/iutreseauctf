@@ -2,8 +2,8 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
 import docker
-from ctf_load import getHostCPU, getHostMem
-from ctf_docker import listContainers, getContainerCount , getcontainerSummary
+from ctf_load import getHostCPU, getHostMem, getHostDisk
+from ctf_docker import listContainers, getContainerCount , getcontainerSummary, getChallengeProviderLogs
 import json
 import argparse
 
@@ -20,7 +20,9 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         "/containerCount":  getContainerCount,
         "/containerSummary": getcontainerSummary,
         "/hostMem": getHostMem,
-        "/hostCPU": getHostCPU
+        "/hostCPU": getHostCPU,
+        "/hostDisk": getHostDisk,
+        "/challengeProviderLogs": getChallengeProviderLogs,
     }
     def my_do_GET(self, fct):
         #listContainers()

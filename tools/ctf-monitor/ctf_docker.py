@@ -80,7 +80,7 @@ def listContainers():
     }
     return ret
 
-def listNetworks(client):
+def listNetworks():
     print ("")
     print ("==== Networks ====")
     for network in client.networks.list():
@@ -93,7 +93,16 @@ def listNetworks(client):
 
     print ("")
 
-def getContainers(client):
+def getContainers():
     c_traefik = client.containers.get("traefik")
     print (c_traefik.id, c_traefik.name, c_traefik.status)
     print ("")
+
+def getChallengeProviderLogs():
+    try:
+        c_challprovider = client.containers.get("challenge-box-provider")
+        logs = c_challprovider.logs().decode()
+    except:
+        logs ="container not found" 
+    ret = { "logs":  logs }
+    return ret
