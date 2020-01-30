@@ -3,7 +3,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
 import docker
 from ctf_load import getHostCPU, getHostMem, getHostDisk
-from ctf_docker import listContainers, getContainerCount , getcontainerSummary, getChallengeProviderLogs
+from ctf_docker import listContainers, getContainerCount , getcontainerSummary, getLogsTraefik, getLogsWebserverNginx, getLogsWebserverPhp, getLogsWebserverMySQL, getLogsChallengeProvider
 import json
 import argparse
 
@@ -22,7 +22,11 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         "/hostMem": getHostMem,
         "/hostCPU": getHostCPU,
         "/hostDisk": getHostDisk,
-        "/challengeProviderLogs": getChallengeProviderLogs,
+        "/logsTraefik": getLogsTraefik,
+        "/logsWebserverNginx": getLogsWebserverNginx,
+        "/logsWebserverPhp": getLogsWebserverPhp,
+        "/logsWebserverMySQL": getLogsWebserverMySQL,
+        "/logsChallengeProvider": getLogsChallengeProvider,
     }
     def my_do_GET(self, fct):
         #listContainers()

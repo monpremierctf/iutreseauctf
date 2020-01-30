@@ -73,8 +73,11 @@
     <div class="row chall-titre bg-secondary text-white">
         <div class="col-sm text-left">Logs</div>
     </div>
-    <button type="submit" class="btn btn-primary" onclick="refreshButtonChallProvider()">Challenge Provider</button>   
-    <button type="submit" class="btn btn-primary" onclick="refreshButtonMySQL()">MySQL</button>   
+    <button type="submit" class="btn btn-primary" onclick='getStatFromServer("#idLogs", "logsTraefik","logs", true, true, true);'>Traefik</button>   
+    <button type="submit" class="btn btn-primary" onclick='getStatFromServer("#idLogs", "logsWebserverNginx","logs", true, true, true);'>Nginx</button>   
+    <button type="submit" class="btn btn-primary" onclick='getStatFromServer("#idLogs", "logsWebserverPhp","logs", true, true, true);'>Php-fpm</button>   
+    <button type="submit" class="btn btn-primary" onclick='getStatFromServer("#idLogs", "logsWebserverMySQL","logs", true, true, true);'>MySQL</button>   
+    <button type="submit" class="btn btn-primary" onclick='getStatFromServer("#idLogs", "logsChallengeProvider","logs", true, true, true);'>Challenge Provider</button>   
     <div class="form-group text-left row">
             <div id="idLogs" class='panel-body bg-light' style='height: 300px; width: 100%; overflow-y: scroll;'>...</div>
     </div>
@@ -99,7 +102,20 @@
             "used": 4847341568, "free": 2265042944, "active": 5633941504, "inactive": 1526718464, "buffers": 128135168, "cached": 3112116224, "shared": 245706752, "slab": 642584576}
         "/hostCPU": getHostCPU
         */
-        function getStatFromServer(elementId, urlParam, jsonParam, replaceCRLF=false, insertHTML=false)
+
+
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
+
+
+        function getStatFromServer(elementId, urlParam, jsonParam, replaceCRLF=false, insertHTML=false, escapeHTML=false)
         {
             var url = "https://"+ window.location.hostname+"/stats/"+urlParam;
             $.get(url, function( data, status ) {
@@ -107,6 +123,7 @@
                     var jsondata = data; //$.parseJSON(data);
                     if (jsondata.hasOwnProperty(jsonParam)) { 
                         var txt = jsondata[jsonParam];
+                        if (escapeHTML) { txt = escapeHtml(txt); }
                         if (replaceCRLF) { txt = txt.replace(/(?:\r\n|\r|\n)/g, '<br>'); }
                         if (insertHTML) {
                             $(elementId).html(txt);

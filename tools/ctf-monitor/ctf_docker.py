@@ -98,11 +98,26 @@ def getContainers():
     print (c_traefik.id, c_traefik.name, c_traefik.status)
     print ("")
 
-def getChallengeProviderLogs():
+def getContainerLogs(boxname):
     try:
-        c_challprovider = client.containers.get("challenge-box-provider")
+        c_challprovider = client.containers.get(boxname)
         logs = c_challprovider.logs().decode()
     except:
         logs ="container not found" 
     ret = { "logs":  logs }
     return ret
+
+def getLogsTraefik():
+    return getContainerLogs("traefik")
+
+def getLogsWebserverNginx():
+    return getContainerLogs("webserver_nginx")
+
+def getLogsWebserverPhp():
+    return getContainerLogs("webserver_php")
+
+def getLogsWebserverMySQL():
+    return getContainerLogs("webserver_mysql")
+
+def getLogsChallengeProvider():
+    return getContainerLogs("challenge-box-provider")
