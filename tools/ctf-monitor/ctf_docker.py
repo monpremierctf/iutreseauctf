@@ -32,10 +32,10 @@ ctfSharedChallengesNames = [
 
 def getContainerCount():
     ret = { "count": len(client.containers.list()) }
-    return json.dumps(ret)
+    return ret
 
 def getcontainerSummary():
-    return json.dumps(listContainers())
+    return listContainers()
 
 
 def listContainers():

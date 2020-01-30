@@ -1,1 +1,1 @@
-python3 ctf-monitor.py &
+python3 ctf-monitor.py 

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import requests
 import random
 import string
@@ -193,7 +195,7 @@ def scenario_serial(exportfileName, nbUserMax, noxterm, nocontainer, maxsleep):
         print ("Registering "+str(nbUserMax)+" users : ")
         for x in range(nbUserMax):
             user1  = UserSession()
-            if (register_user(user1, user1.login, user1.password, user1.mail, 'IUTCTF')):
+            if (register_user(user1, user1.login, user1.password, user1.mail, 'YOLO')):
                 users.append(user1)
                 print "."+str(user1.id)
             else:
@@ -403,8 +405,8 @@ if __name__ == '__main__':
     # Init
     nbUserMax = 60
     print ("= Init")
-    #scenario_serial("extract_clean.txt", nbUserMax, False, False, 2)
-    #exit()
+    scenario_serial("extract_clean.txt", nbUserMax, False, False, 2)
+    exit()
 
     # Register users
 

@@ -14,7 +14,7 @@ cp traefik/traefik.toml.ori  traefik/traefik.toml
 sed -i -e "s/CTF_IPTRAEFIKGW/$CTF_IPTRAEFIKGW/g" traefik/traefik.toml
 
 cp traefik_acme/traefik.toml.ori  traefik_acme/traefik.toml
-sed -i -e "s/CTF_IPTRAEFIKGW/$CTF_IPTRAEFIKGW/g" traefik/traefik.toml
+sed -i -e "s/CTF_IPTRAEFIKGW/$CTF_IPTRAEFIKGW/g" traefik_acme/traefik.toml
 
 
 sed -i -e "s/CTF_IPTRAEFIKGW/$CTF_IPTRAEFIKGW/g" .env

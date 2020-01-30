@@ -36,3 +36,21 @@ entryPoint = "http"
 
 [[acme.domains]]
 main = "yoloctf.org"
+
+
+#
+# Some rules for stat server on Host
+# IP => Traefik LAN Gw
+[file]
+
+[backends]
+  [backends.backend1]
+    [backends.backend1.servers.server1]
+    url = "http://172.19.0.1:7000"
+
+[frontends]
+  [frontends.frontend1]
+  backend = "backend1"
+    [frontends.frontend1.routes.test_1]
+    rule = "PathPrefix:/stats/;ReplacePathRegex: ^/stats/(.*) /$1"
+

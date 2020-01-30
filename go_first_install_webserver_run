@@ -300,6 +300,16 @@ ctf_system_check
 fi
 
 
+#
+# Create docker netkorks
+# 
+docker network create --internal webserver_webLAN   2>/dev/null
+docker network create --internal traefik_challsLAN     2>/dev/null
+CTF_IPTRAEFIKGW="$(docker inspect traefik_challsLAN | grep Gateway | cut -d'"' -f4)"
+export CTF_IPTRAEFIKGW
+
+
+
 #############################################################################
 #
 # Setup config files
@@ -369,6 +379,7 @@ python -c 'from gen_config import dump_challenges_env; dump_challenges_env()'
 echo ''
 echo '[web_server/.env]'
 cat web_server/.env
+echo "Traefik Gw     : $CTF_IPTRAEFIKGW"
 if [ $YESTOALL != "1" ]; then
   while true; do
       echo "";echo ""
@@ -397,13 +408,6 @@ fi
 #
 # Build Docker images & networks
 #
-
-#
-# Create docker netkorks
-# 
-docker network create --internal webserver_webLAN   2>/dev/null
-docker network create --internal traefik_challsLAN     2>/dev/null
-CTF_IPTRAEFIKGW="$(docker inspect traefik_challsLAN | grep Gateway | cut -d'"' -f4)"
 
 ctf_build_all() {
 
@@ -709,6 +713,18 @@ done
 
 
 #
+# Start ctf-monitor
+echo "|"
+echo "| Starting host monitor..."
+echo "|"
+cd tools/ctf-monitor
+#./ctf-monitor-kill.sh
+#./ctf-monitor-launch-bg.sh
+cd - > /dev/null
+
+
+
+#
 # Logs
 #
 # docker-compose logs
@@ -726,6 +742,7 @@ echo ""
 echo "compte admin   : $CTF_ADMIN_ACCOUNT"
 echo "password admin : $CTF_ADMIN_PASSWORD"
 echo "Traefik Gw     : $CTF_IPTRAEFIKGW"
+echo "Host monitor   : cd ./tools/ctf-monitor;./ctf-monitor-launch-bg.sh; cd -"
 }
 
 if [ ! $NORUN == 1 ]; then

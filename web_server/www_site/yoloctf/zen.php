@@ -29,6 +29,9 @@
   <script src="/yoloctf/js/popper.min.js"></script>
   <script src="/yoloctf/js/bootstrap.min.js"></script>
   <script src="/yoloctf/js/ctf-utils.js"></script>
+  <script src="/yoloctf/js/moment.min.js"></script>
+
+
 	<style>
 		canvas {
 			-moz-user-select: none;
@@ -277,6 +280,23 @@
     }
 
 
+    // ...Cant modify env variables
+    // TO DO: Add a SESSION['CSRFEnabled'] parameter
+    // SESSION['CSRFEnabled'] = $_ENV["CTF_CSRFGUARD_ENABLED"] if not set.
+    function ctf_csrf_enable(){
+        if (putenv("CTF_CSRFGUARD_ENABLED=true")) {
+            echo "ok";
+        } else {
+            echo "ko";
+        }
+    }
+    function ctf_csrf_disable(){
+        if (putenv("CTF_CSRFGUARD_ENABLED=false")){
+            echo "ok";
+        } else {
+            echo "ko";
+        }
+    }
 
     if (isset($_SESSION['login'] )) {
         // $admin from ctf_env.php
@@ -288,8 +308,12 @@
             if (isset($_GET['importParticipants'])){
                 DBImportParticipantsFromFile();
             }
-            
-
+            if (isset($_GET['CSRFEnable'])){
+                ctf_csrf_enable();
+            }
+            if (isset($_GET['CSRFDisable'])){
+                ctf_csrf_disable();
+            }
 
             // Get containers
             $url = 'http://challenge-box-provider:8080/listChallengeBox/';
@@ -325,6 +349,19 @@
 
             echo "<h4>Import</h4>";
             print '<a href="zen.php?importParticipants" ><pre class="ctf-menu-color">[ImportParticipants]</pre></a> ';
+
+            echo "<h3>Env</h3> ";
+            echo "<div class='panel panel-primary'><div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
+               foreach (getenv() as $key => $value){
+                   echo "$key=$value<br />";
+               }
+            print "</div></div></br>";
+
+            print "<h3>CSRF Enabled:";
+            echo json_encode($_ENV["CTF_CSRFGUARD_ENABLED"]);
+            print "</h3> ";
+            print '<a href="zen.php?CSRFEnable" ><pre class="ctf-menu-color">[CSRFEnable]</pre></a> ';
+            print '<a href="zen.php?CSRFDisable" ><pre class="ctf-menu-color">[CSRFDisable]</pre></a> ';
 
 
         } else {

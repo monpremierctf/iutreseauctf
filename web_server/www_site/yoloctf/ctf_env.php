@@ -26,6 +26,10 @@
     $ctf_url2 = getenv('CTF_URL_2')?getenv('CTF_URL_2'):'';
     $ctf_url3 = getenv('CTF_URL_3')?getenv('CTF_URL_3'):'';
 
-    $ReCaptchaEnabled = False;
-    $CSRFGuardEnabled = True;
+    $ReCaptchaEnabled = getenv('CTF_CAPTCHA_ENABLED')?getenv('CTF_CAPTCHA_ENABLED'):'false';
+    $ReCaptchaId = getenv('CTF_CAPTCHA_ID')?getenv('CTF_CAPTCHA_ID'):'';
+    $ReCaptchaSecret = getenv('CTF_CAPTCHA_SECRET')?getenv('CTF_CAPTCHA_SECRET'):'';
+    $CSRFGuardEnabled = getenv('CTF_CSRFGUARD_ENABLED')?getenv('CTF_CSRFGUARD_ENABLED'):'true';
+
+    
 ?>

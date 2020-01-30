@@ -99,7 +99,9 @@
             elseif ($p==="Xterm") {
                 include "my_term.php";
             }
-            
+            elseif ($p==="Monitor") {
+              include "p_monitor.php";
+          }
             elseif ($p==="Welcome_validated") {
               $string = file_get_contents("p_welcome_validated.md");
               print $Parsedown->text($string);

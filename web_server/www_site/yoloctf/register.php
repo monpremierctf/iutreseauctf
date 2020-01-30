@@ -1,6 +1,12 @@
 <?php
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', 1);
+    header_remove("X-Powered-By");
+    header("X-XSS-Protection: 1");
+    header('X-Frame-Options: SAMEORIGIN'); 
+   session_start ();
    include "ctf_env.php";
-   if (isset($CSRFGuardEnabled)&&($CSRFGuardEnabled == True)) {
+   if (isset($CSRFGuardEnabled)&&($CSRFGuardEnabled === "true")) {
      include "csrfguard.php";
    }
 /*
@@ -17,12 +23,8 @@
 
     */
     
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.cookie_secure', 1);
-    header_remove("X-Powered-By");
-    header("X-XSS-Protection: 1");
-    header('X-Frame-Options: SAMEORIGIN'); 
-    session_start ();
+
+
 
 
     function file_get_poke($url) {
@@ -223,7 +225,7 @@
           <label for="usr" class="col-2"></label>
 		</div>
         <?php } ?>
-        <?php  if (isset($ReCaptchaEnabled)&&($ReCaptchaEnabled == True)) { ?>
+        <?php  if (isset($ReCaptchaEnabled)&&($ReCaptchaEnabled === "true")) { ?>
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         <div class="field">
                <div class="g-recaptcha" data-sitekey="6LdAw9EUAAAAAGLowra3GcVcI-gfCk7B1465Q0z3"></div>

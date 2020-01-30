@@ -10,7 +10,7 @@
 
 
 $CSRFGUARD_MAXTOKENINSESSION=5; // Max opened tab in browser with Form 
-$CSRFGUARD_DEBUG=true;
+$CSRFGUARD_DEBUG=false;
 $CSRFGUARD_THROWEXCEPTION=true;
 $CSRFGUARD_MSG_INVALIDTOKEN=""; //"Invalid CSRF token."
 $CSRFGUARD_MSG_VALIDTOKEN=""; //"Valid CSRF token."

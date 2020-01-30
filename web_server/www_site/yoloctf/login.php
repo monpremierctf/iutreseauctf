@@ -1,19 +1,20 @@
 <?php
-  include "ctf_env.php";
-  if (isset($CSRFGuardEnabled)&&($CSRFGuardEnabled == True)) {
-    include "csrfguard.php";
-  }
-    /*
-    INPUT
-      $_POST['login']
-      $_POST['password']
-    */
     ini_set('session.cookie_httponly', 1);
     ini_set('session.cookie_secure', 1);
     header_remove("X-Powered-By");
     header("X-XSS-Protection: 1");
     header('X-Frame-Options: SAMEORIGIN'); 
     session_start ();
+    include "ctf_env.php";
+    if (isset($CSRFGuardEnabled)&&($CSRFGuardEnabled === "true")) {
+      include "csrfguard.php";
+    }
+    /*
+    INPUT
+      $_POST['login']
+      $_POST['password']
+    */
+
 
     require_once('ctf_locale.php');
     if (isset($_POST['login']) && isset($_POST['password'])) {
@@ -105,7 +106,7 @@
 		  <input type="password" class="form-control" id="password" name="password">
       
 
-      <?php  if (isset($ReCaptchaEnabled)&&($ReCaptchaEnabled == True)) { ?>
+      <?php  if (isset($ReCaptchaEnabled)&&($ReCaptchaEnabled === 'true')) { ?>
       <script src="https://www.google.com/recaptcha/api.js" async defer></script>
       <div class="field">
           <label for="usr">Verification</label>

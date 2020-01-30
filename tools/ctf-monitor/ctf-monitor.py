@@ -37,9 +37,12 @@ class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         #else:
         #    SimpleHTTPRequestHandler.do_GET(self)
         else:
+            ret = { "Msg": "Ready to serve ["+self.path+"]"}
             self.send_response(200)
-            self.end_headers()
-            self.wfile.write(b'Ready to serve ['+self.path.encode()+b"]")   
+            self.send_header('Content-type','application/json')
+            self.end_headers()            
+            self.wfile.write(json.dumps(ret).encode())
+ 
         
 
 #
