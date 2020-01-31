@@ -101,7 +101,13 @@
             }
             elseif ($p==="Monitor") {
               include "p_monitor.php";
-          }
+            } 
+            elseif ($p==="AdminIUT") {
+              include "p_adminiut.php";
+            }
+          
+
+
             elseif ($p==="Welcome_validated") {
               $string = file_get_contents("p_welcome_validated.md");
               print $Parsedown->text($string);

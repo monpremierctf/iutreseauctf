@@ -161,18 +161,18 @@
         $mysqli->close();
     }
 
-    function DBImportParticipants($lycee, $etablissement,
+    function DBImportParticipants($lycee, $etablissement, $teamname,
         $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
         $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
         $uid , $state){
         include "ctf_sql.php";
         
         $query = "INSERT INTO participants (
-            lycee, etablissement,
+            lycee, etablissement, teamname,
             nom1, prenom1, email1, uid1, ismail1confirmed,
             nom2, prenom2, email2, uid2, ismail2confirmed,
             uid , state) 
-        VALUES ('$lycee', '$etablissement',
+        VALUES ('$lycee', '$etablissement', '$teamname',
             '$nom1', '$prenom1', '$email1', '$uid1', '$ismail1confirmed',
             '$nom2', '$prenom2', '$email2', '$uid2', '$ismail2confirmed',
             '$uid' , '$state');";
@@ -208,7 +208,7 @@
         $state = trim($f[16]);
         $flags = trim($f[17]);
 
-        DBImportParticipants($lycee, $etablissement,
+        DBImportParticipants($lycee, $etablissement, $teamname,
             $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
             $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
             $uid , $state);

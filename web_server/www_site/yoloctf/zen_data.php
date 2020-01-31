@@ -63,8 +63,7 @@
             if (isset($_GET['LoginExist'])){
                 echo json_encode(db_login_exists($_GET['LoginExist']));
                 exit;
-            }
-            
+            }           
 
 
 ?>

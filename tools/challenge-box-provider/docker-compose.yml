@@ -7,6 +7,7 @@ version: '2'
 services:
   challenge-box-provider:
     image: ubuntu:latest
+    restart: always
     #build: ./ 
     container_name: challenge-box-provider
     #ports:

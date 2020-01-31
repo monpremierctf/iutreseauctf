@@ -33,5 +33,8 @@
                 if (($_SESSION['login']==$admin  )) {
                     print '<a href="zen.php" ><pre class="ctf-menu-color">[Admin]</pre></a> ';
                 }
+                if (($_SESSION['login']==$admin  )) {
+                    print '<a href="index.php?p=AdminIUT" ><pre class="ctf-menu-color">[Admin IUT]</pre></a> ';
+                }
             }
             ?>

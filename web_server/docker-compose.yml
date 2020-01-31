@@ -9,6 +9,7 @@ services:
 
   webserver_frontdoor:
     image: nginx:latest
+    restart: always
     container_name: webserver_nginx_frontdoor
     networks:
       - webserver_webLAN
@@ -28,6 +29,7 @@ services:
 
   webserver_nginx:
     image: nginx:latest
+    restart: always
     container_name: webserver_nginx
     #ports:
     #  - "8888:80"
@@ -54,6 +56,7 @@ services:
   webserver_php:
     #image: php:7-fpm
     build: php/.
+    restart: always
     container_name: webserver_php
     env_file:
       - .env
@@ -71,6 +74,7 @@ services:
 
   webserver_mysql:
     build: ./mysql/
+    restart: always
     container_name: webserver_mysql
     # for debug
     #ports:
