@@ -93,6 +93,30 @@
         }
     }
 
+    function DBReset()
+    {
+        include "ctf_sql.php";
+        $query = "DELETE FROM flags;";
+		if ($result = $mysqli->query($query)) {
+			
+		}
+		$query = "DELETE FROM users  where login!='$admin';";
+		if ($result = $mysqli->query($query)) {
+			
+        }
+        $query = "DELETE FROM participants  where 1=1;";
+		if ($result = $mysqli->query($query)) {
+			
+		}
+		$mysqli->close();
+    }
+
+
+
+    if ($_POST['cmd']==="dbReset") {
+        DBReset();
+        echo "dbReset: done";
+    }
 
     if ($_POST['cmd']==="resetPassword") {
         DBUpdatePassword($_POST['uid'], md5($_POST['password']));

@@ -13,6 +13,7 @@ web_server/.env
 web_server/www_site/yoloctf/*.custom.php
 web_server/www_site/yoloctf/db/*
 web_server/www_site/yoloctf/uploads/*
+web_server/www_site/yoloctf/upload/*
 web_server/www_site/yoloctf/intro/*
 web_server/traefik/certs/*
 web_server/mysql/init_db_ctf.sql

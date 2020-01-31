@@ -143,7 +143,7 @@
         $.post("p_adminiut_data.php", postdata)
             .done(function(data) {
                 alert("Data Loaded: " + data);
-            });
+        });
     }
 
     function onrowResetPassword(uid) {
@@ -218,6 +218,142 @@ function dump_table_by_iut()
 }
 
 
+    // Must be admin...
+    function DBCreateExtTable(){
+        include "ctf_sql.php";
+        $query = 'CREATE TABLE IF NOT EXISTS participants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            lycee VARCHAR,
+            etablissement VARCHAR,
+            nom1 VARCHAR,
+            prenom1 VARCHAR,
+            email1 VARCHAR,
+            uid1 VARCHAR,
+            ismail1confirmed boolean,
+            nom2 VARCHAR,
+            prenom2 VARCHAR,
+            email2 VARCHAR,
+            uid2 VARCHAR,
+            ismail2confirmed boolean,
+            uid VARCHAR,
+            teamname VARCHAR,
+            state INTEGER
+        );';
+		if ($result = $mysqli->query($query)) {
+			
+		}
+		$mysqli->close();
+
+    }
+
+    function DBImportUser($login, $upasswd, $mail, $pseudo, $uid, $status) {
+        include "ctf_sql.php";
+        $status = 'enabled';
+        $request = "INSERT into users (login, passwd, mail, pseudo, UID, status) VALUES ('$login', md5('$upasswd'), '$mail','$pseudo', '$uid', '$status')";
+        $result = $mysqli->query($request);
+        $count  = $result->affected_rows;
+        if ($result) {}
+        $mysqli->close();
+    }
+
+    function DBImportParticipants($lycee, $etablissement, $teamname,
+        $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
+        $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
+        $uid , $state){
+        include "ctf_sql.php";
+        
+        $query = "INSERT INTO participants (
+            lycee, etablissement, teamname,
+            nom1, prenom1, email1, uid1, ismail1confirmed,
+            nom2, prenom2, email2, uid2, ismail2confirmed,
+            uid , state) 
+        VALUES ('$lycee', '$etablissement', '$teamname',
+            '$nom1', '$prenom1', '$email1', '$uid1', '$ismail1confirmed',
+            '$nom2', '$prenom2', '$email2', '$uid2', '$ismail2confirmed',
+            '$uid' , '$state');";
+        if ($result = $mysqli->query($query)) {
+			
+		} else {
+
+        }
+		$mysqli->close();
+    }
+
+    function DBImportParticipantsFromFileLine($line){
+        $f = explode(";", $line);
+
+        $etablissement = trim($f[2]);
+        $lycee = trim($f[3]);
+
+        $uid = trim($f[4]);
+        $teamname = trim($f[5]);
+
+        $uid1 = trim($f[6]);
+        $nom1 = trim($f[7]);
+        $prenom1 = trim($f[8]);
+        $email1 = trim($f[9]);
+        $ismail1confirmed = trim($f[10]);
+
+        $uid2 = trim($f[11]);
+        $nom2 = trim($f[12]);
+        $prenom2 = trim($f[13]);
+        $email2 = trim($f[14]);
+        $ismail2confirmed = trim($f[15]);
+
+        $state = trim($f[16]);
+        $flags = trim($f[17]);
+
+        DBImportParticipants($lycee, $etablissement, $teamname,
+            $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
+            $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
+            $uid , $state);
+
+        DBImportUser($teamname, $uid, $email1, $teamname, $uid, 'enabled');
+    }
+
+    function DBImportParticipantsFromFile($file){
+        $handle = fopen($file, "r");
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                DBImportParticipantsFromFileLine($line);
+            }
+
+            fclose($handle);
+        } else {
+            // error opening the file.
+        } 
+    }
+
+
+function DBCheckImport() {
+
+    if (isset($_FILES['importfile'])) {
+        
+        $extension = end(explode(".",$_FILES['importfile']['name']));
+
+        echo "Upload file      : ".$_FILES['importfile']['name']."<br/>";
+        echo "-File type       : ".$_FILES['importfile']['type']."<br/>";
+        echo "-File extension  : ".$extension."<br/>";
+        echo "-File size       : ".$_FILES['importfile']['size']."<br/>";
+        echo "-File tmp        : ".$_FILES['importfile']['tmp_name']."<br/>";
+        echo "-Status          : ".$_FILES['importfile']['error']."<br/>";
+        echo "<br />";
+             
+        if (!$_FILES['importfile']['error']) {
+            if (!isset($uploaddir)) { $uploaddir="upload/"; }
+            move_uploaded_file($_FILES['importfile']['tmp_name'], $uploaddir.'/'.$_FILES['importfile']['name']);
+            echo "\n\nDéplacement du fichier dans $uploaddir<br/>\n";
+            DBImportParticipantsFromFile($uploaddir."/".$_FILES['importfile']['name']);
+            echo "<a href='$uploaddir/".$_FILES['importfile']['name']."'> $uploaddir/".$_FILES['importfile']['name']."</a><br/>\n";
+
+        } else {
+            echo "<font color='red'>Pb lors de l'upload</font> <br/>";
+        }
+
+        
+    } 
+}
+
 ?>
 
 
@@ -226,9 +362,46 @@ function dump_table_by_iut()
     <div class="col text-left">
         <h2>Admin Day CTF</h2><br><br>
     </div>
-    <div class="col text-center">
 
-        <!---- UID, login, mail  --->
+<script>
+    function onDBupload()
+    {
+
+    }
+
+    function onDBReset()
+    {
+        if (!confirm("Reset Database ?")) { return; }
+        var postdata = {
+            'cmd': "dbReset",
+        }
+        $.post("p_adminiut_data.php", postdata)
+            .done(function(data) {
+                alert(data);
+            });
+    }
+</script>
+
+
+
+    <div class="col text-center">
+        <!---- DB --->
+        <div class="row chall-titre bg-secondary text-white">
+            <div class="col-sm text-left">Database Import/Export</div>
+        </div>
+        <div class="col text-left">
+              <button type="submit" class="btn btn-primary" onclick="onDBReset();">Reset DB</button>
+        </div>
+        <div class="col text-left">
+
+       
+            <form enctype="multipart/form-data" action="" method="post">
+                <input type="hidden" name="MAX_FILE_SIZE" value="10000000" />
+                <input id="importfile" type="file" name="importfile"/>
+                <button type="submit" class="btn btn-primary" value="Import">Import Equipes IUT</button>
+            </form>
+        </div>
+
 
         <div class="">
             <div class="row chall-titre bg-secondary text-white">
@@ -240,7 +413,9 @@ function dump_table_by_iut()
                     if (isset($_SESSION['login'])) {
                         // $admin from ctf_env.php
                         if (($_SESSION['login'] === $admin)) {
-                            /*
+                            DBCheckImport();
+
+                            /* Full table dump
                             table_begin();
                             dump_table();
                             table_end();

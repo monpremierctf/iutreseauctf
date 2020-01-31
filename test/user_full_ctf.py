@@ -305,7 +305,7 @@ SHOULD_TERMINATE = False
 def run_user_journey(u, flags):
     time.sleep(randint(2, 4))
     print ("["+str(u.id)+"] Register ")
-    register_user(u, u.login, u.password, u.mail, 'IUTCTF')
+    register_user(u, u.login, u.password, u.mail, 'YOLO')
 
 
     totalflag= len(flags['results']) 
@@ -403,9 +403,10 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, service_shutdown)
 
     # Init
-    nbUserMax = 60
+    nbUserMax = 20
     print ("= Init")
-    scenario_serial("", nbUserMax, False, False, 2)
+    #scenario_serial("extract_clean.txt", nbUserMax, False, False, 2)
+    scenario_serial("extract_clean.txt", nbUserMax, True, True, 2)
     exit()
 
     # Register users

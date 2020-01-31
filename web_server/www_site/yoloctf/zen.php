@@ -123,111 +123,6 @@
 
     }
 
-    // Must be admin...
-    function DBCreateExtTable(){
-        include "ctf_sql.php";
-        $query = 'CREATE TABLE IF NOT EXISTS participants (
-            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            lycee VARCHAR,
-            etablissement VARCHAR,
-            nom1 VARCHAR,
-            prenom1 VARCHAR,
-            email1 VARCHAR,
-            uid1 VARCHAR,
-            ismail1confirmed boolean,
-            nom2 VARCHAR,
-            prenom2 VARCHAR,
-            email2 VARCHAR,
-            uid2 VARCHAR,
-            ismail2confirmed boolean,
-            uid VARCHAR,
-            teamname VARCHAR,
-            state INTEGER
-        );';
-		if ($result = $mysqli->query($query)) {
-			
-		}
-		$mysqli->close();
-
-    }
-
-    function DBImportUser($login, $upasswd, $mail, $pseudo, $uid, $status) {
-        include "ctf_sql.php";
-        $status = 'enabled';
-        $request = "INSERT into users (login, passwd, mail, pseudo, UID, status) VALUES ('$login', md5('$upasswd'), '$mail','$pseudo', '$uid', '$status')";
-        $result = $mysqli->query($request);
-        $count  = $result->affected_rows;
-        if ($result) {}
-        $mysqli->close();
-    }
-
-    function DBImportParticipants($lycee, $etablissement, $teamname,
-        $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
-        $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
-        $uid , $state){
-        include "ctf_sql.php";
-        
-        $query = "INSERT INTO participants (
-            lycee, etablissement, teamname,
-            nom1, prenom1, email1, uid1, ismail1confirmed,
-            nom2, prenom2, email2, uid2, ismail2confirmed,
-            uid , state) 
-        VALUES ('$lycee', '$etablissement', '$teamname',
-            '$nom1', '$prenom1', '$email1', '$uid1', '$ismail1confirmed',
-            '$nom2', '$prenom2', '$email2', '$uid2', '$ismail2confirmed',
-            '$uid' , '$state');";
-        if ($result = $mysqli->query($query)) {
-			
-		} else {
-
-        }
-		$mysqli->close();
-    }
-
-    function DBImportParticipantsFromFileLine($line){
-        $f = explode(";", $line);
-
-        $etablissement = trim($f[2]);
-        $lycee = trim($f[3]);
-
-        $uid = trim($f[4]);
-        $teamname = trim($f[5]);
-
-        $uid1 = trim($f[6]);
-        $nom1 = trim($f[7]);
-        $prenom1 = trim($f[8]);
-        $email1 = trim($f[9]);
-        $ismail1confirmed = trim($f[10]);
-
-        $uid2 = trim($f[11]);
-        $nom2 = trim($f[12]);
-        $prenom2 = trim($f[13]);
-        $email2 = trim($f[14]);
-        $ismail2confirmed = trim($f[15]);
-
-        $state = trim($f[16]);
-        $flags = trim($f[17]);
-
-        DBImportParticipants($lycee, $etablissement, $teamname,
-            $nom1, $prenom1, $email1, $uid1, $ismail1confirmed,
-            $nom2, $prenom2, $email2, $uid2, $ismail2confirmed,
-            $uid , $state);
-
-        DBImportUser($teamname, $uid, $email1, $teamname, $uid, 'enabled');
-    }
-
-    function DBImportParticipantsFromFile(){
-        $handle = fopen("extract_sample.txt", "r");
-        if ($handle) {
-            while (($line = fgets($handle)) !== false) {
-                DBImportParticipantsFromFileLine($line);
-            }
-
-            fclose($handle);
-        } else {
-            // error opening the file.
-        } 
-    }
 
     function clearUsers(){
         include "ctf_sql.php";
@@ -306,7 +201,7 @@
                 clearFlags();
             }
             if (isset($_GET['importParticipants'])){
-                DBImportParticipantsFromFile();
+                //DBImportParticipantsFromFile();
             }
             if (isset($_GET['CSRFEnable'])){
                 ctf_csrf_enable();
