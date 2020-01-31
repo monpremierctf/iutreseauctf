@@ -69,6 +69,10 @@
 </div>
 
 <!---- Logs  --->
+<?php
+if (isset($_SESSION['login'])) {
+                        // $admin from ctf_env.php
+                        if (($_SESSION['login'] === $admin)) { ?>
 <div class="">
     <div class="row chall-titre bg-secondary text-white">
         <div class="col-sm text-left">Logs</div>
@@ -88,7 +92,8 @@
 <hr>
 </div>
 
-         
+<?php }
+ } ?>      
 
 
 <script>
