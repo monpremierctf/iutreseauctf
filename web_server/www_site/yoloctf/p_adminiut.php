@@ -100,6 +100,7 @@
                 ?>
                 <td><button type="submit" class="btn btn-primary" onclick="return onrowSave('<?php echo htmlspecialchars($row['uid']); ?>')">Save</button></td>
                 <td><button type="submit" class="btn btn-primary" onclick="return onrowResetPassword('<?php echo htmlspecialchars($row['uid']); ?>')">ResetPassword</button></td>
+                <td><button type="submit" class="btn btn-primary" onclick="return onrowDelete('<?php echo htmlspecialchars($row['uid']); ?>')">Delete</button></td>
 
             </tr>
 
@@ -155,6 +156,19 @@
             'cmd': "resetPassword",
             'uid': uid,
             'password': passwd,
+        }
+        $.post("p_adminiut_data.php", postdata)
+            .done(function(data) {
+                alert("Data Loaded: " + data);
+            });
+    }
+    function onrowDelete(uid) {
+        if (! confirm("Delete entry ?")) {
+            return;
+        }
+        var postdata = {
+            'cmd': "deleteUID",
+            'uid': uid,
         }
         $.post("p_adminiut_data.php", postdata)
             .done(function(data) {

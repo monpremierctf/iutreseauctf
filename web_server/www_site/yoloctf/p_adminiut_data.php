@@ -11,6 +11,43 @@
             exit();
     }
 
+
+    function DBDeleteUID($uid) {
+        include "ctf_sql_pdo.php";
+        $query = "DELETE FROM users WHERE UID=:uid ; ";
+        $stmt = $mysqli_pdo->prepare($query);
+        $count  = 0;
+        if ($stmt->execute([
+            'uid' => $uid 
+            ])) {
+            $count  = $stmt->rowCount();
+        } else {            
+            printf("Delete failed");
+            exit();
+        }
+        $query = "DELETE FROM flags WHERE UID=:uid ; ";
+        $stmt = $mysqli_pdo->prepare($query);
+        $count  = 0;
+        if ($stmt->execute([
+            'uid' => $uid 
+            ])) {
+            $count  = $stmt->rowCount();
+        } else {            
+            printf("Delete failed");
+            exit();
+        }
+        $query = "DELETE FROM participants WHERE UID=:uid ; ";
+        $stmt = $mysqli_pdo->prepare($query);
+        $count  = 0;
+        if ($stmt->execute([
+            'uid' => $uid 
+            ])) {
+            $count  = $stmt->rowCount();
+        } else {            
+            printf("Delete failed");
+            exit();
+        }
+    }
     
 
     function DBUpdatePassword($uid, $passwd) {
@@ -121,6 +158,10 @@
     if ($_POST['cmd']==="resetPassword") {
         DBUpdatePassword($_POST['uid'], md5($_POST['password']));
         echo "resetPassword ".$_POST['uid']." ".$_POST['password'];
+    }
+    if ($_POST['cmd']==="deleteUID") {
+        DBDeleteUID($_POST['uid']);
+        echo "deleteUID ".$_POST['uid'];
     }
     if ($_POST['cmd']==="saveEntry") {
         DBUpdateUser($_POST['login'], $_POST['mail'], $_POST['pseudo'], $_POST['uid'], $_POST['status']) ;
