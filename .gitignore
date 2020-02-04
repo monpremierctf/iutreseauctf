@@ -30,7 +30,5 @@ ctfd_config/db
 ctfd_config/uploads
 install.log
 mon_premier_ctf
-
-
-
+challenges_list.cfg
 

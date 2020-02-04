@@ -45,7 +45,7 @@ exposedByDefault = false
 [backends]
   [backends.backend1]
     [backends.backend1.servers.server1]
-    url = "http://172.19.0.1:7000"
+    url = "http://192.168.176.1:7000"
 
 [frontends]
   [frontends.frontend1]
