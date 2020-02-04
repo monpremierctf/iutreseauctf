@@ -24,16 +24,15 @@
             print '<a href="scoreboard.php" target="_blank"><pre class="ctf-menu-color">[Score board]</pre></a> ';
             print '<a href="index.php?p=Profile" "><pre class="ctf-menu-color">[Mon Compte]</pre></a> ';
             print '<a href="feedback.php" "><pre class="ctf-menu-color">[Feedback]</pre></a> ';
-            print '<a href="index.php?p=Monitor" "><pre class="ctf-menu-color">[Monitor]</pre></a> ';
+
             
 
 
             $admin = getenv('PHP_ADMIN_ACCOUNT')?getenv('PHP_ADMIN_ACCOUNT'):'admin';
             if (isset($_SESSION['login'] )) {
                 if (($_SESSION['login']==$admin  )) {
+                    print '<a href="index.php?p=Monitor" "><pre class="ctf-menu-color">[Monitor]</pre></a> ';
                     print '<a href="zen.php" ><pre class="ctf-menu-color">[Admin]</pre></a> ';
-                }
-                if (($_SESSION['login']==$admin  )) {
                     print '<a href="index.php?p=AdminIUT" ><pre class="ctf-menu-color">[Admin IUT]</pre></a> ';
                 }
             }
