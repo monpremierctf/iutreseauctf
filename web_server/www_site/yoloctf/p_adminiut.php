@@ -45,6 +45,7 @@
                 <th>State pre-enregistrement</th>
                 <th>status compte</th>
                 <th>Flags</th>
+                <th>Score</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -97,6 +98,7 @@
                 table_element_editable($row['uid'], $row['state'], 'state');
                 table_element_editable($row['uid'], $row['status'], 'status');
                 table_element_editable($row['uid'], $row['flag'], 'flag');
+                table_element_static($row['uid'], $row['max_score'], 'score');
                 ?>
                 <td><button type="submit" class="btn btn-primary" onclick="return onrowSave('<?php echo htmlspecialchars($row['uid']); ?>')">Save</button></td>
                 <td><button type="submit" class="btn btn-primary" onclick="return onrowResetPassword('<?php echo htmlspecialchars($row['uid']); ?>')">ResetPassword</button></td>
@@ -200,9 +202,9 @@
 function dump_table_by_iut()
 {
     include "ctf_sql.php";
-    $user_query = "SELECT * FROM participants p
-            LEFT JOIN users u
-            on p.uid = u.uid
+    $user_query = "SELECT *, max(score) as max_score FROM participants p
+            LEFT JOIN users u  on p.uid = u.uid
+            LEFT JOIN flags f  on p.uid = f.uid
             GROUP BY p.id
             ORDER BY etablissement, lycee;";
     if ($result = $mysqli->query($user_query)) {
