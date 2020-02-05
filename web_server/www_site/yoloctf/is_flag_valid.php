@@ -93,13 +93,15 @@
             }
             return;
         }
-        
+        require_once'ctf_enable.php';
         if (isset($_GET['flag'])) {
             if (isFlagValid($cid,$flag)){
                 print "ok";
-                save_flag_submission($_SESSION['uid'], $cid, $flag, true);
+                if (isFlagValidationAllowed()) { save_flag_submission($_SESSION['uid'], $cid, $flag, true); }
             } else {
                 print "ko";
+
+                if (isFlagValidationAllowed()) { save_flag_submission($_SESSION['uid'], $cid, $flag, false); }
                 save_flag_submission($_SESSION['uid'], $cid, $flag, false);
             }   
         } else {

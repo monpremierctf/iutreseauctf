@@ -10,6 +10,7 @@ services:
     #  - "${PORT_HTTP}:80"
     networks:
       - webserver_webLAN
+      - traefik_challsLAN
     #  - sqliLAN
     volumes:
       - ./www_site:/www_site
@@ -60,3 +61,5 @@ networks:
     external: true
   sqliLAN:
     driver: bridge
+  traefik_challsLAN:
+    external: true

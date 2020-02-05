@@ -1,4 +1,5 @@
 <?php
+
     $admin = getenv('CTF_ADMIN_ACCOUNT')?getenv('CTF_ADMIN_ACCOUNT'):'admin';
     $passwd = getenv('MYSQL_USER_PASSWORD')?getenv('MYSQL_USER_PASSWORD'):'passwordforctfuser';
     $mysql_root_passwd =  getenv('MYSQL_ROOT_PASSWORD')?getenv('MYSQL_ROOT_PASSWORD'):'passwordforctfroot';
