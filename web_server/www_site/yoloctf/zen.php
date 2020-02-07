@@ -7,295 +7,306 @@
 	GLOBAL : $_SESSION
 
 	*/
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.cookie_secure', 1);
-    header_remove("X-Powered-By");
-    header("X-XSS-Protection: 1");
-    header('X-Frame-Options: SAMEORIGIN'); 
-    session_start ();
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', 1);
+header_remove("X-Powered-By");
+header("X-XSS-Protection: 1");
+header('X-Frame-Options: SAMEORIGIN');
+session_start();
 
 
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <title>Y0L0 CTF</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">  
-  <link rel="stylesheet" href="/yoloctf/js/bootstrap.min.css">
-  <link rel="stylesheet" href="/yoloctf/style.css">
-  <script src="/yoloctf/js/jquery.min.js"></script>
-  <script src="/yoloctf/js/popper.min.js"></script>
-  <script src="/yoloctf/js/bootstrap.min.js"></script>
-  <script src="/yoloctf/js/ctf-utils.js"></script>
-  <script src="/yoloctf/js/moment.min.js"></script>
+    <title>Y0L0 CTF</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/yoloctf/js/bootstrap.min.css">
+    <link rel="stylesheet" href="/yoloctf/style.css">
+    <script src="/yoloctf/js/jquery.min.js"></script>
+    <script src="/yoloctf/js/popper.min.js"></script>
+    <script src="/yoloctf/js/bootstrap.min.js"></script>
+    <script src="/yoloctf/js/ctf-utils.js"></script>
+    <script src="/yoloctf/js/moment.min.js"></script>
 
 
-	<style>
-		canvas {
-			-moz-user-select: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-		}
-	</style>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
 
 
 </head>
+
 <body>
 
-<!--- Page Header  -->
-<?php
-    include 'ctf_env.php'; 
+    <!--- Page Header  -->
+    <?php
+    include 'ctf_env.php';
     include "Parsedown.php";
     $Parsedown = new Parsedown();
-    include 'header.php'; 
+    include 'header.php';
 
-?>
-
-
-<div class="container-fluid">
-    <div class="row">
-        <!--- Page TOC  -->
-        <div class="col-md-auto">
-            <?php include 'toc.php' ?>
-        </div>
-
-        <!--- Page Content  -->
-        <div class="col">
-        <div class="container">
+    ?>
 
 
-<?php
-    
+    <div class="container-fluid">
+        <div class="row">
+            <!--- Page TOC  -->
+            <div class="col-md-auto">
+                <?php include 'toc.php' ?>
+            </div>
+
+            <!--- Page Content  -->
+            <div class="col">
+                <div class="container">
 
 
-    function dumpUserList(){
-        include "ctf_sql.php";
-        $user_query = "SELECT login, UID FROM users;";
-        if ($result = $mysqli->query($user_query)) {
-            echo "Nb users : ".$result->num_rows."</br>";
-            while ($row = $result->fetch_assoc()) {
-                $uid = $row['UID'];
-                $login = $row['login'];
-                echo "[".htmlspecialchars($login)."]  ".$uid."</br>";	
-            }
-            $result->close();
-        }
-        $mysqli->close();
-    }
+                    <?php
 
 
-    function dumpUserFlags() {
-        include "ctf_sql.php";
-		$user_query = "SELECT login, UID FROM users;";
-		if ($user_result = $mysqli->query($user_query)) {
-			while ($row = $user_result->fetch_assoc()) {
-				$uid = $row['UID'];
-				$login = $row['login'];
-                echo "</br><u>[".htmlspecialchars($login)."]  ".$uid."</u></br>";	
-                $query = "SELECT UID,CHALLID, fdate, isvalid, flag FROM flags WHERE UID='$uid';";
-                if ($fresult = $mysqli->query($query)) {
-                   
-                    while ($frow = $fresult->fetch_assoc()) {
-                        $chall = getChallengeById($frow['CHALLID']);
-                        if ($frow['isvalid']) {
-                            printf ("%s (%s) (%s): ok</br>", $frow['fdate'], $frow['CHALLID'], $chall['name']);
+
+                    function dumpUserList()
+                    {
+                        include "ctf_sql.php";
+                        $user_query = "SELECT login, UID FROM users;";
+                        if ($result = $mysqli->query($user_query)) {
+                            echo "Nb users : " . $result->num_rows . "</br>";
+                            while ($row = $result->fetch_assoc()) {
+                                $uid = $row['UID'];
+                                $login = $row['login'];
+                                echo "[" . htmlspecialchars($login) . "]  " . $uid . "</br>";
+                            }
+                            $result->close();
+                        }
+                        $mysqli->close();
+                    }
+
+
+                    function dumpUserFlags()
+                    {
+                        include "ctf_sql.php";
+                        $user_query = "SELECT login, UID FROM users;";
+                        if ($user_result = $mysqli->query($user_query)) {
+                            while ($row = $user_result->fetch_assoc()) {
+                                $uid = $row['UID'];
+                                $login = $row['login'];
+                                echo "</br><u>[" . htmlspecialchars($login) . "]  " . $uid . "</u></br>";
+                                $query = "SELECT UID,CHALLID, fdate, isvalid, flag FROM flags WHERE UID='$uid';";
+                                if ($fresult = $mysqli->query($query)) {
+
+                                    while ($frow = $fresult->fetch_assoc()) {
+                                        $chall = getChallengeById($frow['CHALLID']);
+                                        if ($frow['isvalid']) {
+                                            printf("%s (%s) (%s): ok</br>", $frow['fdate'], $frow['CHALLID'], $chall['name']);
+                                        } else {
+                                            printf("%s (%s) (%s) </br>", $frow['fdate'], $frow['CHALLID'], htmlspecialchars($frow['flag']));
+                                        }
+                                    }
+                                    $fresult->close();
+                                }
+                            }
+                            $user_result->close();
+                        }
+                        $mysqli->close();
+                    }
+
+                    function clearFlags()
+                    {
+                        include "ctf_sql.php";
+                        $query = "DELETE FROM flags;";
+                        if ($result = $mysqli->query($query)) {
+                        }
+                        $mysqli->close();
+                    }
+
+
+                    function clearUsers()
+                    {
+                        include "ctf_sql.php";
+                        clearFlags();
+                        $query = "DELETE FROM users  where login!='$admin';";
+                        if ($result = $mysqli->query($query)) {
+                        }
+                        $mysqli->close();
+                    }
+
+                    function dumpUserContainersList($cont)
+                    {
+                        include "ctf_sql.php";
+                        $user_query = "SELECT login, UID FROM users;";
+                        if ($result = $mysqli->query($user_query)) {
+                            while ($row = $result->fetch_assoc()) {
+                                $uid = $row['UID'];
+                                $login = $row['login'];
+                                echo "<u>[" . htmlspecialchars($login) . "]  " . $uid . "</u></br>";
+                                if ($cont != null) {
+                                    foreach ($cont as $c) {
+                                        if ('CTF_UID_' . $uid == $c->Uid) {
+                                            echo "    - " . $c->Name . "</br>";
+                                        }
+                                    }
+                                }
+                            }
+                            $result->close();
+                        }
+                        $mysqli->close();
+                    }
+                    ?>
+
+
+
+                    <?php
+
+
+                    function file_get_contents_curl($url)
+                    {
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_HEADER, 0);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
+                        curl_setopt($ch, CURLOPT_URL, $url);
+                        //curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
+                        //curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Your application name');
+                        $data = curl_exec($ch);
+                        curl_close($ch);
+                        return $data;
+                    }
+
+
+                    // ...Cant modify env variables
+                    // TO DO: Add a SESSION['CSRFEnabled'] parameter
+                    // SESSION['CSRFEnabled'] = $_ENV["CTF_CSRFGUARD_ENABLED"] if not set.
+                    function ctf_csrf_enable()
+                    {
+                        if (putenv("CTF_CSRFGUARD_ENABLED=true")) {
+                            echo "ok";
                         } else {
-                            printf ("%s (%s) (%s) </br>", $frow['fdate'], $frow['CHALLID'], htmlspecialchars($frow['flag']));
+                            echo "ko";
                         }
                     }
-                    $fresult->close();	
-                }		
-			}
-			$user_result->close();
-		}
-		$mysqli->close();
-    }
-    
-    function clearFlags(){
-        include "ctf_sql.php";
-		$query = "DELETE FROM flags;";
-		if ($result = $mysqli->query($query)) {
-			
-		}
-		$mysqli->close();
-
-    }
-
-
-    function clearUsers(){
-        include "ctf_sql.php";
-        clearFlags();
-		$query = "DELETE FROM users  where login!='$admin';";
-		if ($result = $mysqli->query($query)) {
-			
-		}
-		$mysqli->close();
-
-    }
-
-    function dumpUserContainersList($cont){
-        include "ctf_sql.php";
-        $user_query = "SELECT login, UID FROM users;";
-        if ($result = $mysqli->query($user_query)) {
-            while ($row = $result->fetch_assoc()) {
-                $uid = $row['UID'];
-                $login = $row['login'];
-                echo "<u>[".htmlspecialchars($login)."]  ".$uid."</u></br>";	
-                if ($cont != null)	{
-                    foreach ($cont as $c) {
-                        if ('CTF_UID_'.$uid == $c->Uid) {
-                            echo "    - ".$c->Name."</br>";
+                    function ctf_csrf_disable()
+                    {
+                        if (putenv("CTF_CSRFGUARD_ENABLED=false")) {
+                            echo "ok";
+                        } else {
+                            echo "ko";
                         }
                     }
-                }
-            }
-            $result->close();
-        }
-        $mysqli->close();
-    }
-?>
 
+                    if (isset($_SESSION['login'])) {
+                        // $admin from ctf_env.php
+                        if (($_SESSION['login'] === $admin)) {
+                            // Actions
+                            if (isset($_GET['clearFlags'])) {
+                                clearFlags();
+                            }
 
+                            if (isset($_GET['CSRFEnable'])) {
+                                ctf_csrf_enable();
+                            }
+                            if (isset($_GET['CSRFDisable'])) {
+                                ctf_csrf_disable();
+                            }
 
-<?php
-    
-    
-    function file_get_contents_curl($url) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
-        curl_setopt($ch, CURLOPT_URL, $url);
-        //curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
-        //curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Your application name');
-        $data = curl_exec($ch);
-        curl_close($ch);
-        return $data;
-    }
+                            // Get containers
+                            $url = 'http://challenge-box-provider:8080/listChallengeBox/';
+                            $json = file_get_contents_curl($url);
+                            $cont = json_decode($json);
 
+                            echo "<h3>Php sessions</h3> ";
+                            echo "Nb sessions : " . get_active_users();
 
-    // ...Cant modify env variables
-    // TO DO: Add a SESSION['CSRFEnabled'] parameter
-    // SESSION['CSRFEnabled'] = $_ENV["CTF_CSRFGUARD_ENABLED"] if not set.
-    function ctf_csrf_enable(){
-        if (putenv("CTF_CSRFGUARD_ENABLED=true")) {
-            echo "ok";
-        } else {
-            echo "ko";
-        }
-    }
-    function ctf_csrf_disable(){
-        if (putenv("CTF_CSRFGUARD_ENABLED=false")){
-            echo "ok";
-        } else {
-            echo "ko";
-        }
-    }
-
-    if (isset($_SESSION['login'] )) {
-        // $admin from ctf_env.php
-        if (($_SESSION['login']=== $admin )) {
-            // Actions
-            if (isset($_GET['clearFlags'])){
-                clearFlags();
-            }
-            if (isset($_GET['importParticipants'])){
-                //DBImportParticipantsFromFile();
-            }
-            if (isset($_GET['CSRFEnable'])){
-                ctf_csrf_enable();
-            }
-            if (isset($_GET['CSRFDisable'])){
-                ctf_csrf_disable();
-            }
-
-            // Get containers
-            $url = 'http://challenge-box-provider:8080/listChallengeBox/';
-            $json = file_get_contents_curl($url);
-            $cont = json_decode($json);
-
-            echo "<h3>Php sessions</h3> ";
-            echo "Nb sessions : ". get_active_users();
-
-            echo "<h3>Users</h3>
+                            echo "<h3>Users</h3>
                 <div class='panel panel-primary'>
                     <div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
-            dumpUserList();
-            print "</div></div></br>";
+                            dumpUserList();
+                            print "</div></div></br>";
 
-            echo "<h3>Flags submited</h3> 
+                            echo "<h3>Flags submited</h3> 
                 <div class='panel panel-primary'>
                     <div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
-            dumpUserFlags();
-            print "</div></div></br>";
-            
-            echo "<h3>Containers</h3> ";
-            echo "Nb Containers = ".count($cont)."</br>
+                            dumpUserFlags();
+                            print "</div></div></br>";
+
+                            echo "<h3>Containers</h3> ";
+                            echo "Nb Containers = " . count($cont) . "</br>
                 <div class='panel panel-primary'>
                     <div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
-            dumpUserContainersList($cont);
-            print "</div></div></br>";
+                            dumpUserContainersList($cont);
+                            print "</div></div></br>";
 
-            echo "</br>";
-            
-            echo "<h4>BDD</h4>";
-            print '<a href="zen.php?clearFlags" ><pre class="ctf-menu-color">[ClearFlags]</pre></a> ';
+                            echo "</br>";
 
-            echo "<h4>Import</h4>";
-            print '<a href="zen.php?importParticipants" ><pre class="ctf-menu-color">[ImportParticipants]</pre></a> ';
+                            echo "<h4>BDD</h4>";
+                    ?>
 
-            echo "<h3>Env</h3> ";
-            echo "<div class='panel panel-primary'><div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
-               foreach (getenv() as $key => $value){
-                   echo "$key=$value<br />";
-               }
-            print "</div></div></br>";
+                            <td><button type="submit" class="btn btn-primary" onclick="return onClearFlags()">[ClearFlags]</button></td>
+                            <script>
+                                function onClearFlags() {
+                                    if (!confirm("Clear ALL flags ?")) {
+                                        return;
+                                    }
+                                    var getdata = {
+                                        'clearFlags': "1",
+                                    }
+                                    $.get("zen.php", getdata)
+                                        .done(function(data) {
+                                            alert("Done");
+                                        });
+                                }
+                            </script>
 
-            print "<h3>CSRF Enabled:";
-            echo json_encode($_ENV["CTF_CSRFGUARD_ENABLED"]);
-            print "</h3> ";
-            print '<a href="zen.php?CSRFEnable" ><pre class="ctf-menu-color">[CSRFEnable]</pre></a> ';
-            print '<a href="zen.php?CSRFDisable" ><pre class="ctf-menu-color">[CSRFDisable]</pre></a> ';
+                    <?php
 
+                            echo "<h3>Env</h3> ";
+                            echo "<div class='panel panel-primary'><div class='panel-body bg-light' style='height: 300px; overflow-y: scroll;'> ";
+                            foreach (getenv() as $key => $value) {
+                                echo "$key=$value<br />";
+                            }
+                            print "</div></div></br>";
 
-            if (isset($_GET['FlagValidationAllowed'])){
-                file_put_contents("isFlagValidationAllowed.cfg", "true");
-            }
-            if (isset($_GET['FlagValidationClosed'])){
-                file_put_contents("isFlagValidationAllowed.cfg", "false");
-            }
-            print "<h3>Soumission de flag authorisée:";
-            $isFlagValidationAllowed = file_get_contents("isFlagValidationAllowed.cfg");
-            echo $isFlagValidationAllowed ;
-            print "</h3> ";
-            print '<a href="zen.php?FlagValidationAllowed" ><pre class="ctf-menu-color">[Authoriser la soumission de flag]</pre></a> ';
-            print '<a href="zen.php?FlagValidationClosed" ><pre class="ctf-menu-color">[Interdire la soumission de flag]</pre></a> ';
-            
-        } else {
-
-        }
-
-            
-
-    } else {
-        //echo "Merci de vous connecter.";
-    }
+                            print "<h3>CSRF Enabled:";
+                            echo json_encode($_ENV["CTF_CSRFGUARD_ENABLED"]);
+                            print "</h3> ";
+                            print '<a href="zen.php?CSRFEnable" ><pre class="ctf-menu-color">[CSRFEnable]</pre></a> ';
+                            print '<a href="zen.php?CSRFDisable" ><pre class="ctf-menu-color">[CSRFDisable]</pre></a> ';
 
 
+                            if (isset($_GET['FlagValidationAllowed'])) {
+                                file_put_contents("isFlagValidationAllowed.cfg", "true");
+                            }
+                            if (isset($_GET['FlagValidationClosed'])) {
+                                file_put_contents("isFlagValidationAllowed.cfg", "false");
+                            }
+                            print "<h3>Soumission de flag authorisée:";
+                            $isFlagValidationAllowed = file_get_contents("isFlagValidationAllowed.cfg");
+                            echo $isFlagValidationAllowed;
+                            print "</h3> ";
+                            print '<a href="zen.php?FlagValidationAllowed" ><pre class="ctf-menu-color">[Authoriser la soumission de flag]</pre></a> ';
+                            print '<a href="zen.php?FlagValidationClosed" ><pre class="ctf-menu-color">[Interdire la soumission de flag]</pre></a> ';
+                        } else {
+                        }
+                    } else {
+                        //echo "Merci de vous connecter.";
+                    }
 
- 
-?>
-         </div>
+
+
+
+                    ?>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
 
-  
+
 </body>
+
 </html>
-
-
-
-
