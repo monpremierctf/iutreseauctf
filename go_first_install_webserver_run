@@ -742,7 +742,7 @@ echo ""
 echo "compte admin   : $CTF_ADMIN_ACCOUNT"
 echo "password admin : $CTF_ADMIN_PASSWORD"
 echo "Traefik Gw     : $CTF_IPTRAEFIKGW"
-echo "Host monitor   : cd ./tools/ctf-monitor;./ctf-monitor-launch-bg.sh; cd -"
+echo "Host monitor   : cd ./tools/ctf-monitor; nohup ./ctf-monitor-launch-bg.sh; cd -"
 }
 
 if [ ! $NORUN == 1 ]; then

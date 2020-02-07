@@ -408,16 +408,18 @@ function DBCheckImport() {
         <div class="col text-left">
               <button type="submit" class="btn btn-primary" onclick="onDBReset();">Reset DB</button>
         </div>
-        <div class="col text-left">
-
-       
+        <div class="col text-left">       
             <form enctype="multipart/form-data" action="" method="post">
                 <input type="hidden" name="MAX_FILE_SIZE" value="10000000" />
                 <input id="importfile" type="file" name="importfile"/>
                 <button type="submit" class="btn btn-primary" value="Import">Import Equipes IUT</button>
             </form>
         </div>
-
+        <div class="col text-left">    
+            <form action="p_adminiut_export.php" method="post">
+                <button type="submit" class="btn btn-primary" value="Export">Export CSV File</button>
+            </form> 
+        </div>
 
         <div class="">
             <div class="row chall-titre bg-secondary text-white">

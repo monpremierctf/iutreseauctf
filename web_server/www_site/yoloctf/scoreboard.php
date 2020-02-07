@@ -194,6 +194,7 @@ function escapeHtml(unsafe) {
          .replace(/</g, "&lt;")
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
+		 .replace(/é/g, "&eacute;") // é=&eacute;
          .replace(/'/g, "&#039;");
  }
 
