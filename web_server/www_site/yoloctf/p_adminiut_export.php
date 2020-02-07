@@ -25,34 +25,41 @@ function dump_header() {
     return $ret;
 } 
 
+function clean_export($val) {
+    $removechararray = [ ';', '\t', '\n', '\r', '\0', '\x0B' ];
+    foreach ($removechararray as $removechar) {
+        $val = str_replace($removechar, '', $val);
+    }
+    $trimchar = " ,;\t\n\r\0\x0B";
+    return htmlspecialchars(trim($val, $trimchar));
+}
 
 function dump_row($count, $row) { 
     $tab = "; ";
-    $removechar = " ,;\t\n\r\0\x0B";
     $ret = "";
     $ret = $ret.htmlspecialchars($count).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['id'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['etablissement'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['lycee'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['uid'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['teamname'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['uid1'], $removechar)).$tab;
-    $ret = $ret.htmlspecialchars(trim($row['nom1'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['prenom1'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['email1'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['ismail1confirmed'], $removechar)).$tab;
-    $ret = $ret.htmlspecialchars(trim($row['uid2'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['nom2'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['prenom2'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['email2'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['ismail2confirmed'], $removechar)).$tab; 
-    $ret = $ret.htmlspecialchars(trim($row['state'], $removechar)).$tab;
-    $ret = $ret.htmlspecialchars(trim($row['flag'], $removechar)); 
+    $ret = $ret.clean_export($row['id']).$tab; 
+    $ret = $ret.clean_export($row['etablissement']).$tab; 
+    $ret = $ret.clean_export($row['lycee']).$tab; 
+    $ret = $ret.clean_export($row['uid']).$tab; 
+    $ret = $ret.clean_export($row['teamname']).$tab; 
+    $ret = $ret.clean_export($row['uid1']).$tab;
+    $ret = $ret.clean_export($row['nom1']).$tab; 
+    $ret = $ret.clean_export($row['prenom1']).$tab; 
+    $ret = $ret.clean_export($row['email1']).$tab; 
+    $ret = $ret.clean_export($row['ismail1confirmed']).$tab;
+    $ret = $ret.clean_export($row['uid2']).$tab; 
+    $ret = $ret.clean_export($row['nom2']).$tab; 
+    $ret = $ret.clean_export($row['prenom2']).$tab; 
+    $ret = $ret.clean_export($row['email2']).$tab; 
+    $ret = $ret.clean_export($row['ismail2confirmed']).$tab; 
+    $ret = $ret.clean_export($row['state']).$tab;
+    $ret = $ret.clean_export($row['max_score']); 
     $ret = $ret."\n";
     return $ret;
 } 
 
-    $data = "aa, bbb, ccc\nzzz, eee, rrr";
+
     $data="";
 
     include "ctf_sql_pdo.php";
@@ -64,11 +71,10 @@ function dump_row($count, $row) {
     } 
     $statement = $mysqli_pdo->prepare("
             SELECT 
-                p.*, count(f.flag) AS flag 
+                p.*, count(f.flag) AS flag, max(score) as max_score 
                 
             FROM participants p 
-            LEFT JOIN flags f
-            on p.uid = f.uid
+            LEFT JOIN flags f on p.uid = f.uid
             GROUP BY p.id
             ORDER BY etablissement, lycee
         ;");
