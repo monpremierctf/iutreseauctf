@@ -86,7 +86,7 @@ function dumpTop20($limit=0, $iut="", $lycee=""){
                 
                 $object = (object) [
                     "etablissement" => $frow['etablissement'],
-                    "lycee" => ($frow['lycee']), //htmlspecialchars
+                    "lycee" => $frow['lycee'],
                     "login" => $frow['login'],
                     "UID"   => $frow['UID'],
                     "score" => $frow['max_score']

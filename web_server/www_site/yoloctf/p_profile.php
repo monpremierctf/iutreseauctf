@@ -23,7 +23,7 @@
         <input type="text" class="col-6 form-control" id="name" name="name" value="<?php echo isset($_SESSION['login']) ? htmlspecialchars($_SESSION['login']) : "Guest"; ?>">
         <label for="usr" class="col-2"></label>
       </div>
-
+    <!----
       <div class="form-group text-left row">
         <label for="usr" class="col-2">IUT</label>
         <input type="hidden" id="name_current" name="name_current" value="<?php echo isset($_SESSION['login']) ? htmlspecialchars($_SESSION['login']) : "Guest"; ?>">
@@ -38,7 +38,7 @@
         <label for="usr" class="col-2"></label>
       </div>
 
-
+--->
       <div class="form-group text-left  row ">
         <label for="usr" class="col-2">Mail</label>
         <input type="hidden" id="mail_current" name="mail_current" value="<?php echo isset($_SESSION['mail']) ? htmlspecialchars($_SESSION['mail']) : ""; ?>">

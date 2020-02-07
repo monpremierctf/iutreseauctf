@@ -100,9 +100,7 @@
                 if (isFlagValidationAllowed()) { save_flag_submission($_SESSION['uid'], $cid, $flag, true); }
             } else {
                 print "ko";
-
                 if (isFlagValidationAllowed()) { save_flag_submission($_SESSION['uid'], $cid, $flag, false); }
-                save_flag_submission($_SESSION['uid'], $cid, $flag, false);
             }   
         } else {
             $count = is_flag_validated($uid, $cid);

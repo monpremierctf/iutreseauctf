@@ -258,7 +258,7 @@
             print '<a href="zen.php?CSRFEnable" ><pre class="ctf-menu-color">[CSRFEnable]</pre></a> ';
             print '<a href="zen.php?CSRFDisable" ><pre class="ctf-menu-color">[CSRFDisable]</pre></a> ';
 
-            
+
             if (isset($_GET['FlagValidationAllowed'])){
                 file_put_contents("isFlagValidationAllowed.cfg", "true");
             }
@@ -272,7 +272,6 @@
             print '<a href="zen.php?FlagValidationAllowed" ><pre class="ctf-menu-color">[Authoriser la soumission de flag]</pre></a> ';
             print '<a href="zen.php?FlagValidationClosed" ><pre class="ctf-menu-color">[Interdire la soumission de flag]</pre></a> ';
             
-
         } else {
 
         }

@@ -25,6 +25,7 @@ function dump_header() {
     return $ret;
 } 
 
+
 function dump_row($count, $row) { 
     $tab = "; ";
     $removechar = " ,;\t\n\r\0\x0B";
@@ -50,7 +51,6 @@ function dump_row($count, $row) {
     $ret = $ret."\n";
     return $ret;
 } 
-
 
     $data = "aa, bbb, ccc\nzzz, eee, rrr";
     $data="";
